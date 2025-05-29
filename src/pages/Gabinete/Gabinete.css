@@ -1,0 +1,769 @@
+.quadrants-container {
+    padding: 2rem 0;
+    min-height: calc(100vh - 120px);
+    background-color: #f8f9fa;
+}
+
+.quadrants-content {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.quadrants-title {
+    color: black;
+}
+
+.quadrants-map-container {
+    height: 600px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.quadrants-info-container {
+    height: 600px;
+    overflow-y: auto;
+    padding: 1rem;
+    background-color: #ffffff;
+}
+
+.quadrant-card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
+    margin-bottom: 1.5rem;
+    background-color: #ffffff;
+}
+
+.quadrant-card:hover {
+    transform: translateY(-2px);
+}
+
+.quadrant-card .card-title {
+    color: white;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 0.5rem;
+}
+
+.quadrant-card .card-text {
+    color: #34495e;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+}
+
+.quadrant-card .text-muted {
+    color: #6c757d !important;
+}
+
+.quadrant-card .btn-primary {
+    background-color: #3498db;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+    color: white;
+}
+
+.quadrant-card .btn-primary:hover {
+    background-color: #2980b9;
+    transform: translateY(-1px);
+    color: white;
+}
+
+.quadrants-info-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.quadrants-info-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.quadrants-info-container::-webkit-scrollbar-thumb {
+    background: #3498db;
+    border-radius: 3px;
+}
+
+.quadrants-info-container::-webkit-scrollbar-thumb:hover {
+    background: #2980b9;
+}
+
+.incident-legend {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+.incident-legend h6 {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+.legend-text {
+    color: #34495e;
+    font-size: 0.9rem;
+}
+
+.badge {
+    background-color: #1abc9c;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+
+    .quadrants-map-container,
+    .quadrants-info-container {
+        height: 400px;
+    }
+
+    .quadrants-content {
+        padding: 1rem;
+    }
+
+    .incident-legend {
+        bottom: 10px;
+        right: 10px;
+        padding: 10px;
+    }
+}
+
+.gabinete-container {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+}
+
+.quadrant-header {
+    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+    color: white !important;
+    border-bottom: none;
+    padding: 0.5rem 1rem;
+}
+
+.quadrant-header h5,
+.quadrant-header .mb-0 {
+    color: white !important;
+}
+
+.quadrant-body {
+    padding: 0.75rem;
+    background-color: white;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 0.25rem;
+    border-radius: 6px;
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+    background-color: #e9ecef;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-bottom: 0.15rem;
+}
+
+.stat-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+    line-height: 1;
+}
+
+.stat-value.high-impact {
+    color: #e74c3c;
+}
+
+.stat-value.low-impact {
+    color: #f39c12;
+}
+
+.quadrant-footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    padding: 0.5rem;
+}
+
+.hover-card {
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+}
+
+.hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Estilos para las pestañas */
+.nav-tabs .nav-link {
+    color: #222 !important;
+    font-weight: 600;
+    background: none !important;
+    border: none !important;
+    transition: color 0.2s;
+}
+
+.nav-tabs .nav-link:focus,
+.nav-tabs .nav-link:hover {
+    color: #1746a2 !important;
+    background: #f5f5f5 !important;
+}
+
+.nav-tabs .nav-link.active {
+    color: #1746a2 !important;
+    border-bottom: 3px solid #3498db !important;
+    background: none !important;
+    font-weight: 700;
+}
+
+/* Estilos para los botones */
+.btn-outline-primary {
+    color: #3498db;
+    border-color: #3498db;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background-color: #3498db;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Estilos para el título principal */
+.gabinete-container h2,
+.gabinete-container h4,
+.gabinete-container h5,
+.gabinete-container h6,
+.gabinete-container label,
+.gabinete-container .modal-title {
+    color: #222 !important;
+}
+
+.gabinete-container h2 {
+    color: #1a73e8;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    position: relative;
+    padding-bottom: 0.5rem;
+}
+
+.gabinete-container h2:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 3px;
+    background: linear-gradient(135deg, #1a73e8 0%, #2c3e50 100%);
+    border-radius: 3px;
+}
+
+.gabinete-container h4,
+.gabinete-container h5,
+.gabinete-container h6 {
+    color: #1746a2 !important;
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin-bottom: 1.2rem;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 0.3rem;
+    letter-spacing: 0.5px;
+    background: none;
+}
+
+/* Estilos para la sección de Asistencia */
+.attendance-section {
+    background-color: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.attendance-section h4 {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+.attendance-table {
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.attendance-table thead th {
+    background-color: #2c3e50;
+    color: white;
+    font-weight: 500;
+    padding: 1rem;
+    border: none;
+}
+
+.attendance-table tbody td {
+    padding: 1rem;
+    color: #34495e;
+    border-bottom: 1px solid #e9ecef;
+    vertical-align: middle;
+}
+
+.attendance-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Estilos para la sección de Acuerdos */
+.agreements-section {
+    background-color: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.agreements-section h4 {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+.agreement-card {
+    background-color: white;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.agreement-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.agreement-card .card-title {
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.agreement-card .card-text {
+    color: #34495e;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.agreement-card .text-muted {
+    color: #6c757d !important;
+    font-size: 0.9rem;
+}
+
+.agreement-card .badge {
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+.agreement-card .badge.bg-warning {
+    background-color: #f39c12 !important;
+    color: white;
+}
+
+.agreement-card .badge.bg-success {
+    background-color: #2ecc71 !important;
+    color: white;
+}
+
+/* Estilos para los modales */
+.modal-content {
+    border-radius: 12px;
+    border: none;
+}
+
+.modal-header {
+    background-color: #2c3e50;
+    color: white;
+    border-radius: 12px 12px 0 0;
+    padding: 1.5rem;
+}
+
+.modal-title {
+    font-weight: 600;
+    color: white;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.form-label {
+    color: #2c3e50;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.form-control {
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 0.75rem;
+    color: #2c3e50;
+}
+
+.form-control:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+.form-select {
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 0.75rem;
+    color: #2c3e50;
+}
+
+.form-select:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+/* Estilos para los botones en los modales */
+.modal-footer {
+    border-top: 1px solid #e9ecef;
+    padding: 1.5rem;
+}
+
+.modal-footer .btn-primary {
+    background-color: #3498db;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+}
+
+.modal-footer .btn-secondary {
+    background-color: #95a5a6;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+}
+
+.modal-footer .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para la lista de asistencia */
+.attendance-list {
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.attendance-item {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+}
+
+.attendance-item:hover {
+    background-color: #e9ecef;
+}
+
+.attendance-options {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.attendance-options .form-check {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.attendance-options .form-check-input {
+    margin-left: -1.5rem;
+}
+
+.attendance-options .form-check-label {
+    font-size: 0.9rem;
+    color: #495057;
+}
+
+/* Estilos para la tabla de asistencia */
+.attendance-table th {
+    background-color: #2c3e50;
+    color: white;
+    font-weight: 500;
+    padding: 1rem;
+    border: none;
+}
+
+.attendance-table td {
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+.attendance-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.attendance-status {
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.attendance-status.titular {
+    background-color: #28a745;
+    color: white;
+}
+
+.attendance-status.suplente {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.attendance-status.ausente {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* Estilos para el modal de detalles */
+.incidents-list {
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.incident-card {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+}
+
+.incident-card:hover {
+    background-color: #e9ecef;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.incident-card h6 {
+    color: #2c3e50;
+    font-weight: 600;
+    margin: 0;
+}
+
+.incident-card .badge {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.65rem;
+}
+
+.incident-card .text-muted {
+    font-size: 0.85rem;
+}
+
+.incident-card p {
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Estilos para el modal de detalles del cuadrante */
+.incidents-list.incidents-list-full {
+    width: 100%;
+    max-width: 100%;
+    display: block;
+    padding: 2rem 2rem 1rem 2rem;
+    box-sizing: border-box;
+}
+
+@media (max-width: 991px) {
+    .incidents-list.incidents-list-full {
+        padding: 1rem 0.5rem 0.5rem 0.5rem;
+    }
+}
+
+.quadrant-details-modal .modal-dialog {
+    max-width: 900px;
+    width: 100%;
+    margin: 1.75rem auto;
+}
+
+.quadrant-details-modal .modal-content {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    width: 100%;
+}
+
+.quadrant-details-modal .modal-body {
+    background-color: #f8f9fa;
+    width: 100%;
+    min-height: 400px;
+    padding: 0;
+}
+
+.incident-card {
+    width: 100%;
+    margin: 0 auto 1.5rem auto;
+    box-sizing: border-box;
+}
+
+/* Mejorar el header del modal */
+.quadrant-details-modal .modal-header {
+    padding: 1.5rem 2rem 1rem 2rem;
+    background: linear-gradient(to right, #f8f9fa, #ffffff);
+    border-bottom: 1px solid #e9ecef;
+}
+
+@media (max-width: 991px) {
+    .quadrant-details-modal .modal-header {
+        padding: 1rem 0.75rem 0.5rem 0.75rem;
+    }
+}
+
+/* Ajustar el título */
+.quadrant-details-modal .modal-title h4 {
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+/* Eliminar doble scroll */
+.quadrant-details-modal .modal-body {
+    overflow-x: hidden;
+}
+
+/* Estilos para los badges de estado */
+.badge.bg-info {
+    background-color: #4299e1 !important;
+}
+
+.badge.bg-warning {
+    background-color: #ed8936 !important;
+}
+
+.badge.bg-success {
+    background-color: #48bb78 !important;
+}
+
+.badge.bg-secondary {
+    background-color: #718096 !important;
+}
+
+/* Estilos para el scrollbar */
+.incidents-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.incidents-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.incidents-list::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 4px;
+}
+
+.incidents-list::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+}
+
+/* Estilo para el contenedor de las pestañas */
+.gabinete-container .nav-tabs {
+    background-color: #ffffff;
+    padding: 0.25rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 0.5rem;
+}
+
+/* Estilo para el contenido de las pestañas */
+.gabinete-container .tab-content {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-top: 0.5rem;
+}
+
+/* Filtros de fecha y mes: color de letra blanco */
+input[type="date"],
+input[type="week"],
+input[type="month"],
+.modal-filters-row2 input[type="date"],
+.modal-filters-row2 input[type="week"],
+.modal-filters-row2 input[type="month"],
+.attendance-filters input[type="date"],
+.attendance-filters input[type="week"],
+.attendance-filters input[type="month"] {
+    color: #fff !important;
+    background: #222 !important;
+    border-color: #3949ab !important;
+}
+
+input[type="date"]::placeholder,
+input[type="week"]::placeholder,
+input[type="month"]::placeholder {
+    color: #e3e3e3 !important;
+}
+
+/* Ajustar selectores existentes para que no sobrescriban el color blanco de los inputs de fecha y mes */
+.modal-filters-row2 .form-control,
+.modal-filters-row2 select,
+.modal-filters-row2 input[type='date'],
+.modal-filters-row2 input[type='week'],
+.modal-filters-row2 input[type='month'] {
+    color: #fff !important;
+    background: #222 !important;
+}
+
+/* Iconos de calendario blancos para inputs de fecha, semana y mes */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="week"]::-webkit-calendar-picker-indicator,
+input[type="month"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    background-color: #fff;
+    border-radius: 50%;
+}

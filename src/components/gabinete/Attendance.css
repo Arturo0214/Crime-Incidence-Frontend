@@ -1,0 +1,382 @@
+/* Estilos para el botón de asistencia */
+.attendance-button {
+    background-color: #2563eb !important;
+    border-color: #2563eb !important;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+}
+
+.attendance-button:hover {
+    background-color: #1d4ed8 !important;
+    border-color: #1d4ed8 !important;
+    transform: translateY(-1px);
+}
+
+/* Estilos generales para las tablas */
+.attendance-board,
+.compact-attendance-table {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06),
+        0 8px 15px -3px rgba(0, 0, 0, 0.05);
+    border: none !important;
+    transform: perspective(1000px) rotateX(0deg);
+    transition: transform 0.3s ease;
+    margin-bottom: 1.5rem;
+}
+
+.attendance-board:hover,
+.compact-attendance-table:hover {
+    transform: perspective(1000px) rotateX(1deg);
+}
+
+/* Estilos específicos para la tabla de asistencia */
+.attendance-board thead th,
+.compact-attendance-table thead th {
+    background: linear-gradient(145deg, #2c3e50, #34495e);
+    color: white;
+    font-size: 0.9rem;
+    padding: 0.8rem;
+    border: none;
+    position: relative;
+}
+
+/* Estilos específicos para hacer más compacta la segunda tabla */
+.attendance-board thead th {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.85rem;
+}
+
+.attendance-board tbody td {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.9rem;
+}
+
+.attendance-board .attendance-status {
+    padding: 0.25em 0.6em;
+    font-size: 0.85rem;
+    border-radius: 4px;
+}
+
+.attendance-board thead th:after,
+.compact-attendance-table thead th:after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.attendance-board tbody td,
+.compact-attendance-table tbody td {
+    padding: 0.7rem;
+    vertical-align: middle;
+    border: none;
+    border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+    background: white;
+    position: relative;
+}
+
+.attendance-board tbody tr:last-child td,
+.compact-attendance-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.attendance-board tbody tr:hover td,
+.compact-attendance-table tbody tr:hover td {
+    background: linear-gradient(to right, #f8fafc, white);
+}
+
+/* Estilos para los badges de estado */
+.attendance-status {
+    display: inline-block;
+    padding: 0.4em 1em;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.05),
+        0 1px 1px rgba(0, 0, 0, 0.03);
+    transition: transform 0.2s ease;
+}
+
+.attendance-status:hover {
+    transform: translateY(-1px);
+}
+
+/* Estilos para el wrapper de las tablas */
+.attendance-summary,
+.attendance-board-wrapper {
+    padding: 0.5rem;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
+    border-radius: 14px;
+}
+
+/* Ajustes específicos para el wrapper de la segunda tabla */
+.attendance-board-wrapper {
+    padding: 0.35rem;
+}
+
+@media (max-width: 767.98px) {
+
+    .attendance-table-responsive th,
+    .attendance-table-responsive td {
+        padding: 6px 4px !important;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    .attendance-board,
+    .compact-attendance-table {
+        min-width: 600px;
+        transform: none !important;
+    }
+
+    .attendance-board thead th {
+        padding: 0.4rem 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .attendance-board tbody td {
+        padding: 0.3rem 0.4rem;
+        font-size: 0.85rem;
+    }
+
+    .attendance-summary,
+    .attendance-board-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 0.25rem;
+    }
+}
+
+/* Opcional: mejora visual para mobile */
+@media (max-width: 575.98px) {
+    .attendance-section h4 {
+        font-size: 1.1rem;
+    }
+
+    .attendance-status {
+        font-size: 12px;
+        padding: 0.2em 0.7em;
+    }
+}
+
+.attendance-modal-card {
+    background: #f5f6fa;
+    border-radius: 14px;
+    box-shadow: 0 4px 24px rgba(34, 51, 84, 0.10);
+    padding: 20px 18px 18px 18px;
+    border: 1px solid #eaf1fb;
+    margin-bottom: 0;
+}
+
+.attendance-modal-header {
+    background: #223354;
+    color: #fff;
+    border-radius: 14px 14px 0 0;
+    padding: 16px 24px 12px 24px;
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #eaf1fb;
+    box-shadow: 0 2px 8px rgba(34, 51, 84, 0.07);
+}
+
+.attendance-modal-table {
+    font-size: 15px;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    border: none;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 1px 4px rgba(34, 51, 84, 0.04);
+}
+
+.attendance-modal-table thead th {
+    background: #223354;
+    color: #fff;
+    font-weight: 700;
+    border: none;
+    text-align: center;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(34, 51, 84, 0.10);
+}
+
+.attendance-modal-table tbody tr:nth-child(even) {
+    background: #f5f6fa;
+}
+
+.attendance-modal-table td {
+    border: none;
+    text-align: center;
+    vertical-align: middle;
+    padding: 8px 0;
+}
+
+.attendance-modal-table td:first-child {
+    text-align: left;
+    font-weight: 600;
+    color: #223354;
+    padding-left: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.attendance-radio-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.attendance-radio {
+    accent-color: #223354;
+    width: 20px;
+    height: 20px;
+    margin: 0 4px;
+    transition: accent-color 0.2s;
+}
+
+.attendance-radio[value="titular"] {
+    accent-color: #27ae60;
+}
+
+.attendance-radio[value="suplente"] {
+    accent-color: #2980b9;
+}
+
+.attendance-radio[value="ausente"] {
+    accent-color: #e74c3c;
+}
+
+.attendance-modal-btns {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+@media (max-width: 600px) {
+    .attendance-modal-card {
+        padding: 12px 4px 10px 4px;
+    }
+
+    .attendance-modal-header {
+        font-size: 1rem;
+        padding: 10px 8px 8px 8px;
+    }
+
+    .attendance-modal-btns {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .attendance-modal-table td,
+    .attendance-modal-table th {
+        font-size: 13px;
+        padding: 6px 2px;
+    }
+}
+
+/* Colores para filas de la tabla de asistencia (puedes ajustar los colores a tu gusto) */
+.attendance-modal-table tbody tr:nth-child(1) {
+    background: #e3f2fd;
+}
+
+.attendance-modal-table tbody tr:nth-child(2) {
+    background: #e8f5e9;
+}
+
+.attendance-modal-table tbody tr:nth-child(3) {
+    background: #fff3e0;
+}
+
+.attendance-modal-table tbody tr:nth-child(4) {
+    background: #fce4ec;
+}
+
+.attendance-modal-table tbody tr:nth-child(5) {
+    background: #ede7f6;
+}
+
+.attendance-modal-table tbody tr:nth-child(6) {
+    background: #f3e5f5;
+}
+
+.attendance-modal-table tbody tr:nth-child(7) {
+    background: #e0f2f1;
+}
+
+.attendance-modal-table tbody tr:nth-child(8) {
+    background: #f9fbe7;
+}
+
+.attendance-modal-table tbody tr:nth-child(1) td:first-child::before {
+    content: '●';
+    color: #1976d2;
+    font-size: 1.1em;
+}
+
+.attendance-modal-table tbody tr:nth-child(2) td:first-child::before {
+    content: '●';
+    color: #388e3c;
+    font-size: 1.1em;
+}
+
+.attendance-modal-table tbody tr:nth-child(3) td:first-child::before {
+    content: '●';
+    color: #f57c00;
+    font-size: 1.1em;
+}
+
+.attendance-modal-table tbody tr:nth-child(4) td:first-child::before {
+    content: '●';
+    color: #c2185b;
+    font-size: 1.1em;
+}
+
+.attendance-modal-table tbody tr:nth-child(5) td:first-child::before {
+    content: '●';
+    color: #512da8;
+    font-size: 1.1em;
+}
+
+.attendance-modal-table tbody tr:nth-child(6) td:first-child::before {
+    content: '●';
+    color: #8e24aa;
+    font-size: 1.1em;
+}
+
+.attendance-modal-table tbody tr:nth-child(7) td:first-child::before {
+    content: '●';
+    color: #00897b;
+    font-size: 1.1em;
+}
+
+.attendance-modal-table tbody tr:nth-child(8) td:first-child::before {
+    content: '●';
+    color: #afb42b;
+    font-size: 1.1em;
+}
+
+.attendance-modal-table {
+    box-shadow: 0 6px 24px rgba(34, 51, 84, 0.18), 0 1.5px 6px rgba(34, 51, 84, 0.10);
+    border-radius: 14px;
+    border: none;
+    margin-bottom: 0.5rem;
+    background: #fff;
+    transform: perspective(800px) rotateX(2deg);
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.attendance-modal-table:hover {
+    box-shadow: 0 12px 32px rgba(34, 51, 84, 0.22), 0 2px 8px rgba(34, 51, 84, 0.13);
+    transform: perspective(800px) rotateX(0deg) scale(1.01);
+}

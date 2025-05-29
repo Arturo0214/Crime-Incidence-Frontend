@@ -1,0 +1,104 @@
+.navbar {
+    padding: 0.75rem 0;
+    background: linear-gradient(to right, #1a1a1a, #2c2c2c) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    height: 70px;
+}
+
+.navbar-brand {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #ffffff !important;
+    transition: all 0.3s ease;
+    padding: 0;
+}
+
+.navbar-brand:hover {
+    color: #f8f9fa !important;
+    transform: translateY(-1px);
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-weight: 500;
+    padding: 0.5rem 1rem !important;
+    margin: 0 0.2rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    font-size: 1.1rem;
+}
+
+.nav-link:hover {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-link.active {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.navbar-toggler {
+    border: none;
+    padding: 0.5rem;
+    margin-right: 0.5rem;
+}
+
+.navbar-toggler:focus {
+    box-shadow: none;
+    outline: none;
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.85%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    width: 1.5em;
+    height: 1.5em;
+}
+
+@media (max-width: 991.98px) {
+    .navbar {
+        height: auto;
+        padding: 0.5rem 0;
+    }
+
+    .navbar-collapse {
+        background: rgba(0, 0, 0, 0.95);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 0.5rem;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+    }
+
+    .nav-link {
+        padding: 0.75rem 1rem !important;
+        margin: 0.25rem 0;
+        font-size: 1rem;
+    }
+
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+}
+
+/* Animation for mobile menu */
+.navbar-collapse {
+    transition: all 0.3s ease-in-out;
+}
+
+/* Custom scrollbar for mobile menu */
+.navbar-collapse::-webkit-scrollbar {
+    width: 6px;
+}
+
+.navbar-collapse::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-collapse::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}

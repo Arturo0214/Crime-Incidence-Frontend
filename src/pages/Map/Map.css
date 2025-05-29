@@ -1,0 +1,1863 @@
+.container-fluid {
+    min-height: 100vh;
+    padding-bottom: 2rem;
+}
+
+.map-wrapper {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 2.5rem 1.5rem 0 1.5rem;
+    box-sizing: border-box;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+.map-container {
+    flex: 0 1 75%;
+    min-width: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.map-content {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    min-height: 75vh;
+    height: 75vh;
+}
+
+.map-legend,
+.details-card,
+.incidents-list {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+}
+
+.details-card {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+.map-legend h6 {
+    margin-bottom: 1rem;
+    font-weight: 600;
+    color: #333;
+    font-size: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.875rem;
+    color: #555;
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+}
+
+.custom-marker {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: none;
+    border: none;
+}
+
+.custom-marker i {
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.3));
+}
+
+.custom-marker i:hover {
+    transform: scale(1.2);
+    transition: transform 0.2s ease;
+}
+
+/* Estilos para los popups de Leaflet */
+.leaflet-popup-content-wrapper {
+    padding: 0 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.13) !important;
+}
+
+.leaflet-popup-content {
+    margin: 0 !important;
+    min-width: 140px !important;
+    max-width: 280px !important;
+}
+
+.leaflet-popup-tip {
+    background: white !important;
+}
+
+.leaflet-popup-close-button {
+    display: none;
+}
+
+/* Estilos para los cuadrantes */
+.leaflet-interactive {
+    transition: all 0.3s ease;
+}
+
+.leaflet-interactive:hover {
+    stroke-width: 3;
+    stroke: #666;
+}
+
+/* Estilos para los marcadores de incidentes */
+.leaflet-marker-icon {
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+}
+
+.leaflet-marker-icon:hover {
+    transform: scale(1.2);
+    z-index: 1000;
+}
+
+/* Estilos para los cuadrantes */
+.cuadrante-popup {
+    background: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 14px 14px 10px 14px !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    font-size: 13px;
+    color: #222;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    line-height: 1.3;
+    position: relative;
+    overflow-y: auto;
+    max-height: 45vh;
+}
+
+.cuadrante-popup-header {
+    font-size: 18px;
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 6px;
+    padding: 0;
+    border: none;
+    background: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cuadrante-popup-card {
+    background: #f6f8fa;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(37, 99, 235, 0.06);
+    padding: 10px 14px 8px 12px;
+    margin-bottom: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border-left: 3px solid #2563eb;
+    transition: box-shadow 0.2s;
+}
+
+.cuadrante-popup-card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+    letter-spacing: 0.01em;
+    padding-left: 2px;
+}
+
+.cuadrante-popup-card .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    padding: 0 0 2px 0;
+    border-bottom: 1px solid #e5e7eb;
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+}
+
+.cuadrante-popup-card .row:last-child {
+    border-bottom: none;
+}
+
+.cuadrante-popup-card .label {
+    color: #475569;
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: 0.01em;
+}
+
+.cuadrante-popup-card .value,
+.value-high,
+.value-low {
+    display: inline-block;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 2px 10px;
+    min-width: 22px;
+    text-align: right;
+    border-radius: 6px;
+    margin-left: 8px;
+    font-variant-numeric: tabular-nums;
+    vertical-align: middle;
+}
+
+.value-high {
+    color: #e11d48;
+    background: #fde8ef;
+}
+
+.value-low {
+    color: #b45309;
+    background: #fef9c3;
+}
+
+.cuadrante-popup-footer {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: center;
+}
+
+.cuadrante-popup .popup-button {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 8px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s;
+    box-shadow: 0 1px 4px rgba(37, 99, 235, 0.07);
+    width: auto;
+    min-width: 0;
+    margin: 0 auto;
+    display: block;
+}
+
+.cuadrante-popup .popup-button:hover {
+    background: #1d4ed8;
+}
+
+@media (max-width: 600px) {
+    .cuadrante-popup {
+        max-width: 97vw !important;
+        min-width: 0 !important;
+        font-size: 11px !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+    }
+
+    .cuadrante-popup-header {
+        font-size: 14px !important;
+        gap: 5px;
+        margin-bottom: 3px;
+    }
+
+    .cuadrante-popup-card {
+        padding: 5px 5px;
+        border-radius: 6px;
+    }
+
+    .cuadrante-popup-card .label,
+    .cuadrante-popup-card .value {
+        font-size: 11px !important;
+    }
+
+    .cuadrante-popup .popup-button {
+        padding: 5px 10px !important;
+        font-size: 11px !important;
+    }
+}
+
+/* Estilos para la sección de detalles */
+.map-details {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.details-header h4 {
+    margin: 0;
+    color: #333;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #666;
+    cursor: pointer;
+    padding: 0.25rem;
+    line-height: 1;
+}
+
+.close-btn:hover {
+    color: #333;
+}
+
+.crime-types {
+    margin-top: 1.5rem;
+}
+
+.crime-types h5 {
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.crime-types-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.75rem;
+}
+
+.crime-type-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.crime-type {
+    color: #333;
+    font-weight: 500;
+}
+
+.crime-count {
+    background: #e9ecef;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-weight: bold;
+    color: #333;
+}
+
+.map-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: linear-gradient(90deg, #2563eb 0%, #1e3a8a 100%);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 0.75rem;
+    position: relative;
+    z-index: 1000;
+}
+
+.map-filters-compact {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: linear-gradient(90deg, #2563eb 0%, #1e3a8a 100%);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 1000;
+}
+
+.filter-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 0.25rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.filter-input {
+    width: 100%;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    font-size: 0.875rem;
+    color: #2d3748;
+    background-color: rgba(255, 255, 255, 0.95);
+    transition: all 0.2s ease;
+}
+
+.filter-input:focus {
+    outline: none;
+    border-color: #ffffff;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+    background-color: #ffffff;
+}
+
+.filter-input::placeholder {
+    color: #a0aec0;
+}
+
+/* Forzar estilos claros en los filtros de fecha del panel de filtros */
+.map-filters input[type="date"] {
+    background: #fff !important;
+    color: #222 !important;
+    border: 1px solid #ced4da !important;
+}
+
+.map-filters input[type="date"]::-webkit-input-placeholder {
+    color: #222 !important;
+}
+
+.map-filters input[type="date"]::placeholder {
+    color: #222 !important;
+}
+
+/* Icono de calendario negro en navegadores Webkit */
+.map-filters input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0%) !important;
+}
+
+/* Icono de calendario negro en Firefox */
+.map-filters input[type="date"]::-moz-calendar-picker-indicator {
+    filter: invert(0%) !important;
+}
+
+/* Estilos para dispositivos móviles */
+@media (max-width: 768px) {
+    .map-filters-compact {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.4rem;
+        padding: 0.4rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .filter-label {
+        font-size: 0.7rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .filter-input {
+        padding: 0.35rem 0.4rem;
+        font-size: 0.8rem;
+    }
+
+    .map-content {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 120px);
+    }
+
+    .map-container {
+        height: 50vh;
+        min-height: 300px;
+    }
+
+    .map-side-panel {
+        height: 50vh;
+        overflow-y: auto;
+        padding: 0.5rem;
+    }
+}
+
+/* Estilos para tablets */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .map-filters-compact {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Estilos para pantallas grandes */
+@media (min-width: 1025px) {
+    .map-filters-compact {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Estilos para el contenedor del mapa */
+.map-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: 1rem;
+}
+
+.map-side-panel {
+    flex: 0 1 25%;
+    min-width: 220px;
+    max-width: 400px;
+    min-height: 75vh;
+    height: 75vh;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+    padding: 1.2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.incidents-list {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    flex: 1 1 auto;
+    height: 70vh;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.incidents-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem;
+    min-width: 0;
+    min-height: 0;
+}
+
+.map-side-panel>* {
+    width: 100%;
+    min-width: 0;
+}
+
+@media (max-width: 900px) {
+    .map-wrapper {
+        padding: 1rem 0.5rem 0 0.5rem;
+    }
+
+    .map-content {
+        flex-direction: column;
+        gap: 0.7rem;
+        min-height: 50vh;
+        height: auto;
+    }
+
+    .map-container {
+        width: 100%;
+        min-height: 50vh;
+        height: 50vh;
+        flex: 1 1 100%;
+    }
+
+    .map-side-panel {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        min-height: 40vh;
+        height: auto;
+        max-height: 500px;
+        flex: 1 1 100%;
+        padding: 0.7rem 0.5rem 1.5rem 0.5rem;
+    }
+
+    .incidents-list {
+        height: auto;
+        min-height: 200px;
+    }
+}
+
+@media (max-width: 600px) {
+    .map-wrapper {
+        padding: 0.5rem 0.1rem 0 0.1rem;
+    }
+
+    .map-content {
+        gap: 0.3rem;
+    }
+
+    .map-container {
+        min-height: 40vh;
+        height: 45vh;
+        max-height: 55vh;
+    }
+
+    .map-side-panel {
+        max-height: 30vh;
+        min-height: 100px;
+        padding: 0.4rem 0.1rem 0.7rem 0.1rem;
+        font-size: 0.95rem;
+        overflow-y: auto;
+    }
+
+    .incidents-list {
+        min-height: 120px;
+        height: 30vh;
+    }
+
+    .incident-panel-filters {
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    /* Popups responsivos */
+    .leaflet-popup-content-wrapper {
+        max-width: 85vw !important;
+        min-width: 0 !important;
+        padding: 0 !important;
+    }
+
+    .leaflet-popup-content {
+        max-width: 85vw !important;
+        min-width: 0 !important;
+        padding: 0 !important;
+    }
+
+    .cuadrante-popup,
+    .popup-content {
+        font-size: 0.85rem !important;
+        padding: 0 !important;
+        max-width: 80vw;
+        max-height: 50vh;
+        overflow-y: auto;
+        word-break: break-word;
+    }
+
+    .cuadrante-popup .statistics-summary {
+        grid-template-columns: 1fr !important;
+        gap: 0.3rem !important;
+    }
+
+    .cuadrante-popup .crime-types-list {
+        max-height: 60px !important;
+        overflow-y: auto !important;
+    }
+
+    .leaflet-popup-content h6,
+    .popup-content h3 {
+        font-size: 0.9rem !important;
+        margin-bottom: 0.2rem !important;
+        padding-bottom: 0.2rem !important;
+    }
+
+    .leaflet-popup-content p,
+    .popup-content p {
+        font-size: 0.85rem !important;
+        margin: 0.1rem 0 !important;
+    }
+
+    .cuadrante-popup,
+    .incident-popup {
+        max-width: 85vw !important;
+        min-width: 0 !important;
+        max-height: 45vh !important;
+        overflow-y: auto !important;
+        font-size: 10px !important;
+        padding: 14px 14px 10px 14px !important;
+        border-radius: 6px !important;
+    }
+
+    .cuadrante-popup h6,
+    .incident-popup h6,
+    .incident-popup .popup-title {
+        font-size: 12px !important;
+        margin-bottom: 2px !important;
+        padding-bottom: 1px !important;
+    }
+
+    .cuadrante-popup .statistics-summary,
+    .incident-popup .statistics-summary {
+        grid-template-columns: 1fr !important;
+        gap: 2px !important;
+    }
+
+    .cuadrante-popup .crime-types-list,
+    .incident-popup .crime-types-list {
+        max-height: 50px !important;
+        overflow-y: auto !important;
+    }
+
+    .cuadrante-popup p,
+    .incident-popup p,
+    .incident-popup div,
+    .incident-popup strong {
+        font-size: 10px !important;
+        margin: 1px 0 !important;
+    }
+
+    .incident-popup .popup-button,
+    .cuadrante-popup .popup-button {
+        font-size: 10px !important;
+        padding: 3px 8px !important;
+    }
+}
+
+@media (max-width: 400px) {
+    .leaflet-popup-content-wrapper {
+        max-width: 95vw !important;
+        padding: 0 !important;
+    }
+
+    .leaflet-popup-content {
+        max-width: 95vw !important;
+        padding: 0 !important;
+    }
+
+    .cuadrante-popup {
+        font-size: 0.8rem !important;
+    }
+
+    .cuadrante-popup .popup-close-btn {
+        font-size: 1.3rem !important;
+        top: 8px;
+        right: 10px;
+    }
+
+    .map-container {
+        min-height: 180px;
+        height: 35vh;
+        max-height: 45vh;
+    }
+
+    .cuadrante-popup,
+    .incident-popup {
+        max-width: 95vw !important;
+        max-height: 45vh !important;
+        font-size: 9px !important;
+        padding: 14px 14px 10px 14px !important;
+    }
+
+    .cuadrante-popup h6,
+    .incident-popup h6,
+    .incident-popup .popup-title {
+        font-size: 11px !important;
+    }
+}
+
+/* Asegura que el panel lateral nunca tape el footer */
+.map-side-panel {
+    margin-bottom: 1.5rem;
+}
+
+/* Ajusta leyenda, lista y detalles para usar .map-side-panel */
+.map-legend,
+.incidents-list,
+.details-card {
+    background: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* Responsive styles for map content */
+@media (max-width: 768px) {
+    .map-content {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .map-container {
+        height: 400px;
+    }
+}
+
+/* Estilos para la leyenda */
+.map-legend {
+    background: #f8fafc;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(37, 99, 235, 0.07);
+    border: 1.5px solid #e5e7eb;
+    padding: 2.1rem 2rem 2rem 2rem;
+    margin-bottom: 2rem;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.map-legend-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 1.1rem;
+    letter-spacing: 0.01em;
+    padding-bottom: 0.5rem;
+    border-bottom: 1.5px solid #e5e7eb;
+    background: none;
+    text-shadow: 0 1px 2px rgba(37, 99, 235, 0.07);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    margin-bottom: 1.1rem;
+    font-size: 1.05rem;
+    color: #374151;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
+
+.legend-color {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    margin-right: 0.7rem;
+    border: 2.5px solid #fff;
+    box-shadow: 0 1px 4px rgba(37, 99, 235, 0.10);
+}
+
+/* Estilos para la lista de incidentes */
+.incidents-list {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.incidents-header {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.incident-panel-search {
+    width: 100%;
+    margin-bottom: 0.3rem;
+}
+
+.incident-panel-filters {
+    display: flex;
+    flex-direction: row;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+    align-items: center;
+    flex-wrap: nowrap;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.incidents-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem;
+}
+
+/* Responsive styles for incidents panel */
+@media (max-width: 768px) {
+    .incident-panel-filters {
+        flex-direction: column;
+    }
+
+    .incident-panel-filters>div {
+        width: 100%;
+    }
+}
+
+@media (max-width: 992px) {
+    .map-content {
+        flex-direction: column;
+    }
+
+    .map-container {
+        width: 100%;
+        height: 500px;
+    }
+
+    .map-legend {
+        width: 100%;
+        position: static;
+    }
+
+    .map-wrapper {
+        padding: 0 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .map-wrapper {
+        padding: 0 0.5rem;
+    }
+}
+
+.incidents-list {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    flex: 1 1 auto;
+    height: 70vh;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.incidents-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.incidents-header h6 {
+    margin: 0;
+    font-weight: 600;
+    color: #333;
+    font-size: 1rem;
+}
+
+.close-incidents {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #666;
+    cursor: pointer;
+    padding: 0.25rem;
+    line-height: 1;
+}
+
+.close-incidents:hover {
+    color: #333;
+}
+
+.incidents-container::-webkit-scrollbar {
+    width: 5px;
+}
+
+.incidents-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.incidents-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.incidents-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.incident-card {
+    width: 100%;
+    background: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0.5rem 0 0.5rem 0;
+    margin-bottom: 1rem;
+    border: none;
+}
+
+.incident-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.incident-type {
+    font-weight: 600;
+    color: #333;
+    font-size: 1rem;
+}
+
+.incident-impact {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.incident-impact.alto {
+    background-color: #ff4444;
+    color: white;
+}
+
+.incident-impact.bajo {
+    background-color: #ffbb33;
+    color: white;
+}
+
+.incident-details {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.incident-details p {
+    margin: 0.5rem 0;
+    line-height: 1.4;
+}
+
+.incident-details strong {
+    color: #333;
+    font-weight: 500;
+}
+
+.incident-card form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.incident-type-input,
+.incident-impact-input,
+.incident-details input,
+.incident-details textarea {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 1rem;
+    margin-top: 0.25rem;
+    background: #fff;
+    color: #212529;
+    transition: border 0.2s, box-shadow 0.2s;
+}
+
+.incident-type-input:focus,
+.incident-impact-input:focus,
+.incident-details input:focus,
+.incident-details textarea:focus {
+    border: 1.5px solid #0d6efd;
+    outline: none;
+    box-shadow: 0 0 0 2px #0d6efd33;
+}
+
+.incident-details label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.97rem;
+    color: #333;
+}
+
+.incident-details textarea {
+    min-height: 60px;
+    resize: vertical;
+}
+
+.incident-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.incident-actions button {
+    padding: 0.5rem 1.2rem;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    background: #0d6efd;
+    color: #fff;
+    transition: background 0.2s;
+}
+
+.incident-actions button[type="button"] {
+    background: #adb5bd;
+    color: #212529;
+}
+
+.incident-actions button:disabled {
+    background: #b0c4de;
+    color: #fff;
+    cursor: not-allowed;
+}
+
+.incident-error {
+    color: #dc3545;
+    background: #f8d7da;
+    border-radius: 5px;
+    padding: 0.5rem 0.75rem;
+    margin-top: 0.5rem;
+    font-size: 0.97rem;
+}
+
+.incident-success {
+    color: #198754;
+    background: #d1e7dd;
+    border-radius: 5px;
+    padding: 0.5rem 0.75rem;
+    margin-top: 0.5rem;
+    font-size: 0.97rem;
+}
+
+.incident-panel-filters {
+    display: flex;
+    flex-direction: row;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+    align-items: center;
+    flex-wrap: nowrap;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.incident-panel-filters>div {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.incident-panel-filters input[type="date"],
+.incident-panel-filters input[type="week"],
+.incident-panel-filters select {
+    width: 100%;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    background: #f8f9fa;
+    color: #212529;
+    margin: 0;
+    box-sizing: border-box;
+    height: 2rem;
+}
+
+.incident-panel-filters input[type="date"]::placeholder,
+.incident-panel-filters input[type="week"]::placeholder {
+    color: #888;
+    font-size: 0.97rem;
+}
+
+.incident-panel-filters label {
+    display: none;
+}
+
+@media (max-width: 600px) {
+    .incident-panel-filters {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+.incident-panel-search {
+    width: 100%;
+    margin-bottom: 0.3rem;
+}
+
+.incident-panel-search .filter-input {
+    width: 100%;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    background: #f8f9fa;
+    color: #212529;
+    box-sizing: border-box;
+    height: 2rem;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-report-incident {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+    padding: 2rem 2.5rem 1.5rem 2.5rem;
+    max-width: 480px;
+    width: 100%;
+    position: relative;
+    animation: modalIn 0.2s;
+}
+
+@keyframes modalIn {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    color: #222;
+    text-align: center;
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 1.1rem;
+    right: 1.3rem;
+    background: none;
+    border: none;
+    font-size: 1.7rem;
+    color: #888;
+    cursor: pointer;
+    z-index: 10;
+    transition: color 0.2s;
+}
+
+.modal-close-btn:hover {
+    color: #222;
+}
+
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.modal-form-row {
+    display: flex;
+    gap: 0.7rem;
+    flex-wrap: wrap;
+}
+
+.modal-form-row>* {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.modal-form select,
+.modal-form input,
+.modal-form textarea {
+    width: 100%;
+    padding: 0.5rem 0.8rem;
+    border: 1px solid #ced4da;
+    border-radius: 7px;
+    font-size: 1rem;
+    background: #f8f9fa;
+    color: #222;
+    margin: 0;
+    box-sizing: border-box;
+    transition: border 0.2s, box-shadow 0.2s;
+}
+
+.modal-form select:focus,
+.modal-form input:focus,
+.modal-form textarea:focus {
+    border: 1.5px solid #0d6efd;
+    outline: none;
+    box-shadow: 0 0 0 2px #0d6efd33;
+}
+
+.modal-form textarea {
+    min-height: 60px;
+    resize: vertical;
+}
+
+.modal-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+}
+
+.btn-report-incident-submit {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.6rem 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-report-incident-submit:disabled {
+    background: #b0c4de;
+    color: #fff;
+    cursor: not-allowed;
+}
+
+.modal-error {
+    color: #dc3545;
+    background: #f8d7da;
+    border-radius: 5px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.97rem;
+    margin-bottom: -0.5rem;
+    text-align: center;
+}
+
+.modal-success {
+    color: #198754;
+    background: #d1e7dd;
+    border-radius: 5px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.97rem;
+    margin-bottom: -0.5rem;
+    text-align: center;
+}
+
+.incident-panel-report-btn {
+    width: 100%;
+    margin-bottom: 0.3rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-report-incident {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.4rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+}
+
+.btn-report-incident:hover {
+    background: #1746a2;
+}
+
+.btn-delete-incident {
+    background: #dc3545 !important;
+    color: #fff !important;
+    border: none;
+    border-radius: 5px;
+    padding: 0.5rem 1.1rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-left: auto;
+    transition: background 0.2s;
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.08);
+}
+
+.btn-delete-incident:hover {
+    background: #b02a37 !important;
+    color: #fff !important;
+}
+
+.incident-status {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.incident-status.reportado {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.incident-status.en-investigación {
+    background-color: #0dcaf0;
+    color: #000;
+}
+
+.incident-status.resuelto {
+    background-color: #198754;
+    color: #fff;
+}
+
+.incident-status.archivado {
+    background-color: #6c757d;
+    color: #fff;
+}
+
+@media (max-width: 900px) {
+    .map-legend {
+        width: 100%;
+        max-height: calc(100vh - 350px);
+        overflow-y: auto;
+        margin-bottom: 2.5rem;
+        height: auto;
+    }
+}
+
+@media (max-width: 600px) {
+    .map-legend {
+        width: 100%;
+        max-height: calc(100vh - 220px);
+        margin-bottom: 3rem;
+        padding: 0.7rem 0.3rem;
+    }
+}
+
+.incident-popup {
+    background: #fff;
+    border-radius: 8px;
+    padding: 14px 14px 10px 14px !important;
+    font-size: 11px;
+    color: #222;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    line-height: 1.2;
+    position: relative;
+    overflow-y: auto;
+    max-height: 35vh;
+}
+
+.incident-popup-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
+.incident-popup-icon {
+    font-size: 16px;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+}
+
+.incident-popup-title {
+    font-weight: 700;
+    font-size: 13px;
+    color: #1e293b;
+    margin-bottom: 1px;
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+}
+
+.incident-popup-content .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: 0 0 1px 0;
+    border-bottom: 1px solid #e5e7eb;
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+}
+
+.incident-popup-content .row:last-child {
+    border-bottom: none;
+}
+
+.incident-popup-content .label {
+    color: #475569;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+}
+
+.incident-popup-content .value {
+    color: #2563eb;
+    font-weight: 600;
+    font-size: 11px;
+    background: #e8edfa;
+    border-radius: 4px;
+    padding: 1px 6px;
+    min-width: 18px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    display: inline-block;
+    margin-left: 4px;
+}
+
+.incident-popup-footer {
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: center;
+}
+
+.incident-popup .incident-popup-button {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s;
+    box-shadow: 0 1px 2px rgba(37, 99, 235, 0.07);
+    width: auto;
+    min-width: 0;
+    margin: 0 auto;
+    display: block;
+}
+
+.incident-popup .incident-popup-button:hover {
+    background: #1d4ed8;
+}
+
+.cuadrante-popup .popup-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    color: #666;
+    cursor: pointer;
+    z-index: 10;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.2s;
+    width: auto;
+    height: auto;
+    box-shadow: none;
+    display: block;
+}
+
+.cuadrante-popup .popup-close-btn:hover {
+    color: #2563eb;
+}
+
+.cuadrante-popup-card.summary-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    gap: 4px;
+    padding: 6px 8px;
+}
+
+.cuadrante-popup-card.summary-row .summary-label {
+    font-size: 13px;
+    color: #222;
+    font-weight: 600;
+    white-space: nowrap;
+    margin: 0 2px;
+}
+
+.cuadrante-popup-card.summary-row .summary-value {
+    min-width: 22px;
+    max-width: 32px;
+    text-align: center;
+    font-size: 15px;
+    padding: 2px 6px;
+    border-radius: 6px;
+    margin: 0 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cuadrante-popup-card.summary-row .summary-value:last-child {
+    margin-right: 0;
+}
+
+.summary-value-total {
+    color: #e11d48;
+    background: #fde8ef;
+}
+
+.summary-value-high {
+    color: #e11d48;
+    background: #fde8ef;
+}
+
+.summary-value-low {
+    color: #b45309;
+    background: #fef9c3;
+}
+
+.value-high {
+    color: #e11d48;
+    background: #fde8ef;
+    font-weight: 700;
+}
+
+.value-low {
+    color: #b45309;
+    background: #fef9c3;
+    font-weight: 700;
+}
+
+@media (max-width: 600px) {
+    .incident-popup {
+        max-width: 85vw !important;
+        min-width: 0 !important;
+        max-height: 45vh !important;
+        overflow-y: auto !important;
+        font-size: 10px !important;
+        padding: 14px 14px 10px 14px !important;
+        border-radius: 6px !important;
+    }
+
+    .incident-popup h6,
+    .incident-popup .popup-title {
+        font-size: 12px !important;
+        margin-bottom: 2px !important;
+        padding-bottom: 1px !important;
+    }
+
+    .incident-popup .statistics-summary,
+    .incident-popup .statistics-summary {
+        grid-template-columns: 1fr !important;
+        gap: 2px !important;
+    }
+
+    .incident-popup .crime-types-list,
+    .incident-popup .crime-types-list {
+        max-height: 50px !important;
+        overflow-y: auto !important;
+    }
+
+    .incident-popup p,
+    .incident-popup div,
+    .incident-popup strong {
+        font-size: 10px !important;
+        margin: 1px 0 !important;
+    }
+
+    .incident-popup .popup-button,
+    .incident-popup .popup-button {
+        font-size: 10px !important;
+        padding: 3px 8px !important;
+    }
+}
+
+@media (max-width: 400px) {
+    .incident-popup {
+        max-width: 75vw !important;
+        padding: 14px 14px 10px 14px !important;
+        font-size: 9px !important;
+    }
+
+    .incident-popup h6,
+    .incident-popup .popup-title {
+        font-size: 11px !important;
+    }
+}
+
+@media (max-width: 430px) {
+    .map-container {
+        min-height: 220px !important;
+        height: 38vh !important;
+        max-height: 50vh !important;
+        width: 100% !important;
+        display: block !important;
+    }
+
+    .leaflet-container {
+        min-height: 220px !important;
+        height: 38vh !important;
+        max-height: 50vh !important;
+        width: 100% !important;
+        display: block !important;
+    }
+
+    .cuadrante-popup,
+    .incident-popup {
+        max-height: 25vh !important;
+        min-height: unset !important;
+        font-size: 9px !important;
+        padding: 4px 2px 4px 2px !important;
+        border-radius: 4px !important;
+        overflow-y: auto !important;
+        line-height: 1.1 !important;
+    }
+
+    .cuadrante-popup-header,
+    .incident-popup-header {
+        font-size: 10px !important;
+        margin-bottom: 2px !important;
+        gap: 4px !important;
+    }
+
+    .cuadrante-popup-card.summary-row,
+    .incident-popup-content .row {
+        gap: 2px !important;
+        padding: 1px 0 !important;
+        margin-bottom: 1px !important;
+        flex-wrap: nowrap !important;
+    }
+
+    .cuadrante-popup-card .label,
+    .incident-popup-content .label {
+        font-size: 9px !important;
+        margin-right: 2px !important;
+        white-space: nowrap !important;
+    }
+
+    .cuadrante-popup-card .value,
+    .incident-popup-content .value,
+    .value-high,
+    .value-low {
+        font-size: 9px !important;
+        min-width: 10px !important;
+        max-width: 16px !important;
+        padding: 1px 2px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        white-space: nowrap !important;
+    }
+
+    .cuadrante-popup .popup-button,
+    .incident-popup .incident-popup-button {
+        font-size: 9px !important;
+        padding: 2px 6px !important;
+        border-radius: 3px !important;
+        margin-top: 2px !important;
+    }
+
+    .cuadrante-popup-card-title,
+    .incident-popup-title h3 {
+        font-size: 10px !important;
+        margin-bottom: 1px !important;
+        padding: 0 !important;
+    }
+
+    .incident-popup-title div {
+        font-size: 9px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .incident-popup-footer {
+        margin-top: 2px !important;
+        padding-top: 2px !important;
+    }
+
+    .leaflet-popup-content-wrapper,
+    .leaflet-popup-content {
+        padding: 0.1rem 0.05rem !important;
+        max-width: 98vw !important;
+    }
+
+    .leaflet-popup-tip {
+        width: 8px !important;
+        height: 8px !important;
+    }
+
+    .map-side-panel {
+        min-height: 320px !important;
+        max-height: 70vh !important;
+        height: 70vh !important;
+        overflow-y: auto !important;
+    }
+
+    .incidents-list {
+        min-height: 220px !important;
+        max-height: 60vh !important;
+        height: 60vh !important;
+        overflow-y: auto !important;
+    }
+}
+
+/* --- Mejora profesional para la sección de Tipos de Delitos en el popup de cuadrante --- */
+.cuadrante-popup-card .cuadrante-popup-card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+    letter-spacing: 0.01em;
+    padding-left: 2px;
+}
+
+.cuadrante-popup-card .summary-row {
+    background: #f7fafd;
+    border-radius: 7px;
+    padding: 5px 7px 5px 8px;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 1px 2px rgba(37, 99, 235, 0.04);
+    border: 1px solid #e5e7eb;
+    transition: box-shadow 0.18s;
+    flex-wrap: nowrap;
+    gap: 6px;
+}
+
+.cuadrante-popup-card .summary-row:last-child {
+    margin-bottom: 0;
+}
+
+.cuadrante-popup-card .summary-label {
+    color: #222;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    flex: 1 1 auto;
+    text-align: left;
+    padding-right: 6px;
+    white-space: normal;
+    overflow: visible;
+}
+
+.cuadrante-popup-card .summary-value {
+    min-width: 22px;
+    max-width: 32px;
+    text-align: center;
+    font-size: 12px;
+    padding: 2px 7px;
+    border-radius: 7px;
+    font-weight: 700;
+    margin-left: 6px;
+    font-variant-numeric: tabular-nums;
+    vertical-align: middle;
+    box-shadow: 0 1px 2px rgba(37, 99, 235, 0.06);
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    color: #1e293b;
+    transition: background 0.18s, color 0.18s;
+    flex-shrink: 0;
+    overflow: visible;
+}
+
+.cuadrante-popup-card .summary-value-high {
+    background: #fde8ef;
+    color: #e11d48;
+    border: 1px solid #f8bbd0;
+}
+
+.cuadrante-popup-card .summary-value-low {
+    background: #fef9c3;
+    color: #b45309;
+    border: 1px solid #ffe066;
+}

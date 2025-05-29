@@ -1,0 +1,416 @@
+.agreements-section {
+    padding: 2rem;
+    background: #f8fafc;
+    min-height: 100vh;
+}
+
+.agreements-header {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+}
+
+.agreements-header h4 {
+    color: #1e293b;
+    font-weight: 600;
+    margin: 0;
+}
+
+.agreements-filters {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+}
+
+.agreements-filters .form-label {
+    color: #64748b;
+    font-weight: 500;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.agreements-filters .form-control,
+.agreements-filters .form-select {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.625rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.agreements-filters .form-control:focus,
+.agreements-filters .form-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.agreement-card {
+    background: white;
+    border: none !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    margin-bottom: 1.5rem !important;
+}
+
+.agreement-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.agreement-card .card-body {
+    padding: 2rem 1.5rem 2rem 1.5rem;
+}
+
+.agreement-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.agreement-title {
+    color: #1e293b;
+    font-weight: 600;
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+}
+
+.agreement-description {
+    color: #475569;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.agreement-date-badge {
+    background: #3b82f6;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.agreement-status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-width: 120px;
+    text-align: center;
+    display: inline-block;
+}
+
+.agreement-status-badge.pendiente {
+    background: #fbbf24;
+    color: #92400e;
+}
+
+.agreement-status-badge.en_progreso {
+    background: #60a5fa;
+    color: #1e40af;
+}
+
+.agreement-status-badge.completado {
+    background: #34d399;
+    color: #065f46;
+}
+
+.agreement-status-badge.cancelado {
+    background: #f87171;
+    color: #991b1b;
+}
+
+.agreement-status-badge.informacion {
+    background: #94a3b8;
+    color: #1e293b;
+}
+
+.agreement-status-badge.badge-sm {
+    min-width: unset;
+    font-size: 0.78rem;
+    padding: 0.35em 0.8em;
+    border-radius: 1em;
+    line-height: 1;
+    margin-left: 0.5rem;
+    margin-bottom: 0;
+    box-shadow: none;
+    font-weight: 600;
+    vertical-align: middle;
+    display: inline-block;
+}
+
+.agreement-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.agreement-actions .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.agreement-comments {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.agreement-comments-title {
+    color: #1e293b;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+}
+
+.agreement-comment {
+    background: #f8fafc;
+    padding: 1rem 1.2rem;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    position: relative;
+}
+
+.agreement-comment-content {
+    flex: 1 1 200px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.agreement-comment-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.agreement-comment-author {
+    color: #3b82f6;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.agreement-comment-text {
+    color: #475569;
+    font-size: 0.875rem;
+    margin: 0.25rem 0;
+}
+
+.agreement-comment-date {
+    color: #94a3b8;
+    font-size: 0.75rem;
+}
+
+.agreement-comment-input {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    align-items: center;
+}
+
+.agreement-comment-input input {
+    flex: 1;
+    padding: 0.625rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.agreement-comment-input input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    outline: none;
+}
+
+.agreement-comment-input .btn {
+    min-width: 120px;
+    padding: 0.625rem 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 8px;
+    text-align: center;
+    display: inline-block;
+}
+
+.agreement-section-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    background: white;
+    padding: 1.25rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    flex-wrap: wrap;
+}
+
+.agreement-section-title .badge {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-transform: capitalize;
+}
+
+.agreement-section-title span {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+    position: relative;
+    padding-left: 1rem;
+}
+
+.agreement-section-title span::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 24px;
+    background: #3b82f6;
+    border-radius: 2px;
+}
+
+.agreement-section-date {
+    white-space: nowrap;
+}
+
+.agreement-section-label {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+    word-break: break-word;
+    max-width: 100%;
+}
+
+.empty-agreements {
+    background: white;
+    padding: 3rem;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.empty-agreements p {
+    color: #64748b;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+/* Modal styles */
+.agreement-modal .modal-content {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.agreement-modal .modal-header {
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1.5rem;
+}
+
+.agreement-modal .modal-title {
+    color: #1e293b;
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+.agreement-modal .modal-body {
+    padding: 1.5rem;
+}
+
+.agreement-modal .form-label {
+    color: #64748b;
+    font-weight: 500;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.agreement-modal .form-control,
+.agreement-modal .form-select {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.625rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.agreement-modal .form-control:focus,
+.agreement-modal .form-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.agreement-modal .btn-primary {
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    border-radius: 8px;
+    background: #3b82f6;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.agreement-modal .btn-primary:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+@media (max-width: 600px) {
+    .agreement-section-title {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1rem 0.5rem;
+        text-align: center;
+    }
+
+    .agreement-section-label {
+        font-size: 1.1rem;
+        max-width: 100%;
+        word-break: break-word;
+    }
+
+    .agreement-section-date {
+        font-size: 1rem;
+        max-width: 100%;
+        white-space: normal;
+    }
+
+    .agreement-comment {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0;
+        padding: 0.7rem 0.8rem 0.5rem 0.8rem;
+    }
+
+    .agreement-comment-actions {
+        width: 100%;
+        flex-direction: row;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 2px;
+    }
+}

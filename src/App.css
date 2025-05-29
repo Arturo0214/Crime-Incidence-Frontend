@@ -1,0 +1,268 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Variables globales */
+:root {
+  --primary-color: #2c3e50;
+  --secondary-color: #34495e;
+  --accent-color: #e74c3c;
+  --text-color: #ecf0f1;
+  --background-color: #1a1a1a;
+  --success-color: #27ae60;
+  --warning-color: #f1c40f;
+  --danger-color: #c0392b;
+}
+
+/* Estilos generales */
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: 'Roboto', sans-serif;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Contenedor principal */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  width: 100%;
+}
+
+/* Títulos de sección */
+.section-title {
+  color: var(--text-color);
+  margin-bottom: 2rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* Tarjetas */
+.card {
+  background: #fff !important;
+  color: #222 !important;
+  border-radius: 18px !important;
+  background-color: var(--secondary-color);
+  border: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.card-header {
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0 !important;
+}
+
+/* Botones */
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+.btn-danger {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.btn-danger:hover {
+  background-color: var(--danger-color);
+  border-color: var(--danger-color);
+}
+
+/* Formularios */
+.form-control {
+  background-color: var(--secondary-color);
+  border: 1px solid var(--primary-color);
+  color: var(--text-color);
+  width: 100%;
+}
+
+.form-control:focus {
+  background-color: var(--secondary-color);
+  border-color: var(--accent-color);
+  color: var(--text-color);
+  box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25);
+}
+
+/* Alertas */
+.alert {
+  border: none;
+  border-radius: 8px;
+}
+
+.alert-success {
+  background-color: var(--success-color);
+  color: var(--text-color);
+}
+
+.alert-warning {
+  background-color: var(--warning-color);
+  color: var(--primary-color);
+}
+
+.alert-danger {
+  background-color: var(--danger-color);
+  color: var(--text-color);
+}
+
+/* Mapa */
+.map-wrapper {
+  padding: 1rem;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.map-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+}
+
+.map-legend {
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  width: 100%;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.street-popup {
+  padding: 0.5rem;
+}
+
+.street-popup h4 {
+  margin: 0 0 0.5rem 0;
+  color: #2c3e50;
+}
+
+.street-popup p {
+  margin: 0.25rem 0;
+  color: #34495e;
+}
+
+/* Tablas */
+.table {
+  color: var(--text-color);
+  width: 100%;
+}
+
+.table thead th {
+  background-color: var(--primary-color);
+  border-color: var(--secondary-color);
+}
+
+.table td {
+  border-color: var(--secondary-color);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .map-container {
+    height: 400px;
+    width: 100%;
+  }
+
+  .card {
+    margin: 10px 0;
+  }
+
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .form-control {
+    font-size: 16px;
+    /* Previene zoom en iOS */
+  }
+}
+
+/* Ajustes adicionales para móviles */
+@media (max-width: 480px) {
+  .container {
+    padding: 5px;
+  }
+
+  .map-container {
+    height: 300px;
+  }
+
+  .card {
+    border-radius: 12px !important;
+  }
+
+  .btn {
+    width: 100%;
+    margin: 5px 0;
+  }
+}

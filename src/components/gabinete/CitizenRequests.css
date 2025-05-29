@@ -1,0 +1,299 @@
+/* Estilos para CitizenRequests (responsive y layout) */
+
+.cr-comment-row {
+    background: #f4f8fb;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 15px;
+    color: #222;
+    border: 1px solid #e3e8ee;
+    margin-bottom: 2px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 1px 4px #0001;
+    position: relative;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.cr-comment-author {
+    color: #2563eb;
+    font-weight: 700;
+    margin-right: 10px;
+    min-width: 90px;
+}
+
+.cr-comment-text {
+    flex: 1;
+}
+
+.cr-comment-date {
+    color: #888;
+    font-size: 12px;
+    margin-left: 10px;
+    min-width: 110px;
+    text-align: right;
+}
+
+.cr-comment-edit-btn {
+    background: #ffc107;
+    border: none;
+    color: #222;
+    cursor: pointer;
+    font-weight: 600;
+    border-radius: 5px;
+    padding: 4px 12px;
+    box-shadow: 0 1px 4px #0001;
+    margin-left: 8px;
+    max-width: 120px;
+}
+
+.cr-comment-delete-btn {
+    background: none;
+    border: none;
+    color: #dc3545;
+    cursor: pointer;
+    font-weight: 600;
+    margin-left: 4px;
+    max-width: 120px;
+}
+
+.cr-comment-save-btn {
+    background: none;
+    border: none;
+    color: #198754;
+    cursor: pointer;
+    font-weight: 600;
+    margin-left: 8px;
+    max-width: 120px;
+}
+
+.cr-comment-cancel-btn {
+    background: none;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    font-weight: 600;
+    margin-left: 4px;
+    max-width: 120px;
+}
+
+.cr-comment-form {
+    flex: 3;
+    min-width: 120px;
+    padding: 4px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.cr-comment-add-btn {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 4px 14px;
+    font-weight: 600;
+}
+
+.cr-comment-user,
+.cr-comment-login {
+    color: #888;
+    font-size: 13px;
+    margin-left: 8px;
+}
+
+.cr-header-actions {
+    display: flex;
+    width: 100%;
+    margin-top: 8px;
+    justify-content: flex-end;
+}
+
+.cr-header-delete-btn {
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 6px 18px;
+    font-weight: 600;
+    width: 140px;
+    max-width: 100%;
+    cursor: pointer;
+}
+
+.cr-comment-form-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    width: 100%;
+}
+
+.cr-comment-userinput {
+    flex: 1;
+    min-width: 120px;
+    background: #f4f8fb;
+    color: #888;
+    border: 1px solid #e3e8ee;
+}
+
+.cr-comment-form-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    width: 100%;
+    justify-content: flex-end;
+}
+
+.cr-header-actions-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    min-width: 140px;
+    position: relative;
+}
+
+.cr-status-badge {
+    display: inline-block;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 6px 18px;
+    border-radius: 16px;
+    margin-bottom: 8px;
+    background: #e3e8ee;
+    color: #2563eb;
+    text-transform: capitalize;
+    box-shadow: 0 1px 4px #0001;
+}
+
+.cr-status-pendiente {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.cr-status-asignado {
+    background: #cce5ff;
+    color: #004085;
+}
+
+.cr-status-en\ investigaci\u00f3n {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.cr-status-en\ proceso {
+    background: #d4edda;
+    color: #155724;
+}
+
+.cr-status-atendido {
+    background: #d4edda;
+    color: #155724;
+}
+
+.cr-status-archivado {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+@media (max-width: 600px) {
+    .cr-comment-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+
+    .cr-comment-edit-btn,
+    .cr-comment-delete-btn,
+    .cr-comment-save-btn,
+    .cr-comment-cancel-btn {
+        align-self: stretch;
+        width: 100%;
+        max-width: 100%;
+        margin-left: 0;
+        margin-top: 6px;
+    }
+
+    .cr-comment-date {
+        margin-left: 0;
+        min-width: 0;
+        width: 100%;
+        text-align: left;
+    }
+
+    .cr-comment-form {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .cr-comment-add-btn {
+        width: 100%;
+        margin-top: 6px;
+    }
+
+    .cr-comment-user,
+    .cr-comment-login {
+        margin-left: 0;
+        margin-top: 6px;
+        width: 100%;
+    }
+
+    .cr-header-actions {
+        margin-top: 8px;
+        justify-content: stretch;
+    }
+
+    .cr-header-delete-btn {
+        width: 100%;
+        margin: 0;
+    }
+
+    .cr-comment-form-row {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .cr-comment-form-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+        margin-top: 6px;
+    }
+
+    .cr-comment-add-btn {
+        width: 100%;
+        margin-top: 0;
+    }
+
+    .cr-comment-user,
+    .cr-comment-login {
+        width: 100%;
+        margin-left: 0;
+        margin-top: 0;
+        text-align: left;
+    }
+
+    .cr-header-actions-group {
+        align-items: stretch;
+        min-width: 0;
+    }
+
+    .cr-status-badge {
+        width: 100%;
+        text-align: right;
+        margin-bottom: 8px;
+    }
+
+    .cr-header-actions {
+        width: 100%;
+        margin-top: 0;
+        justify-content: stretch;
+    }
+
+    .cr-header-delete-btn {
+        width: 100%;
+        margin: 0;
+    }
+}
