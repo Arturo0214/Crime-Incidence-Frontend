@@ -768,7 +768,7 @@ const Statistics = () => {
                             ))}
                         </div>
                         <div className="card-body" style={{ padding: '2.5rem 2.5rem 1.5rem 2.5rem', height: 420, minHeight: 320, maxHeight: 540, display: 'flex', flexDirection: 'column', justifyContent: 'center', borderRadius: 18 }}>
-                            <div style={{ height: 400, maxHeight: 480, width: '100%', paddingTop: '0.5rem', overflowX: 'auto' }}>
+                            <div style={{ display: 'flex', flexDirection: 'row', flex: 1, minWidth: 0, width: '100%', height: 400, maxHeight: 480, paddingTop: '0.5rem', overflowX: 'auto' }}>
                                 <Bar
                                     data={{
                                         labels: groupBy === 'dia' ? quadrantDayLabelsToShow : periodLabelsToShow,
@@ -846,14 +846,27 @@ const Statistics = () => {
 
             <div className="row mb-4 analysis-section">
                 <div className="col-12 mb-4 analysis-chart-row">
-                    <div className="card h-100" style={{ minHeight: 600, boxShadow: '0 8px 32px rgba(44,62,80,0.13)', borderRadius: 22, border: '1.5px solid #e0e8f0', background: '#fff', padding: '2.5rem 3rem' }}>
+                    <div className="card h-100" style={{
+                        minHeight: 600,
+                        boxShadow: '0 8px 32px rgba(44,62,80,0.13)',
+                        borderRadius: 22,
+                        border: '1.5px solid #e0e8f0',
+                        background: '#fff'
+                    }}>
                         {/* Título estético */}
-                        <div style={{ textAlign: 'center', marginBottom: '2rem', fontFamily: 'Inter, Poppins, Segoe UI, Arial, sans-serif' }}>
+                        <div style={{
+                            textAlign: 'center',
+                            paddingLeft: '3rem',
+                            paddingRight: '3rem',
+                            paddingTop: '2.5rem',
+                            marginBottom: '2rem',
+                            fontFamily: 'Inter, Poppins, Segoe UI, Arial, sans-serif'
+                        }}>
                             <h3 style={{
-                                fontSize: '1.5rem',
+                                fontSize: '2rem',
                                 fontWeight: '800',
                                 letterSpacing: '-1px',
-                                marginBottom: '0.3rem',
+                                marginBottom: '0.5rem',
                                 background: 'none',
                                 color: '#174ea6',
                                 fontFamily: 'inherit',
@@ -874,117 +887,33 @@ const Statistics = () => {
                                     Análisis de Incidentes por Cuadrante
                                 </span>
                             </h3>
-                            <p style={{
-                                color: '#334155',
-                                fontSize: '1rem',
-                                marginBottom: '0.2rem',
-                                fontWeight: 500,
-                                fontFamily: 'inherit'
-                            }}>
-                                Visualización detallada de la distribución temporal de incidentes
-                            </p>
                         </div>
-
-                        {/* Filtros compactos y elegantes */}
-                        <div className="analysis-filters-row" style={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            gap: '1rem',
-                            marginBottom: '1rem',
-                            padding: '0.4rem 0.7rem',
-                            background: '#f6f8fa',
-                            borderRadius: '10px',
-                            border: '1px solid #e5e7eb',
-                            boxShadow: '0 1px 2px rgba(23,78,166,0.04)',
-                            fontFamily: 'inherit',
-                            alignItems: 'center',
-                            minHeight: 'unset',
-                            maxWidth: 500,
-                            marginLeft: 'auto',
-                            marginRight: 'auto'
+                        {/* Filtros de periodo e impacto */}
+                        <div className="d-flex flex-wrap align-items-center justify-content-center gap-3 mb-3" style={{
+                            paddingLeft: '3rem',
+                            paddingRight: '3rem',
+                            marginBottom: 28, gap: 18, paddingBottom: '0.5rem', flexWrap: 'wrap'
                         }}>
-                            <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                background: '#fff',
-                                padding: '0.2rem 0.7rem',
-                                borderRadius: '7px',
-                                border: '1px solid #e5e7eb',
-                                boxShadow: '0 1px 2px rgba(23,78,166,0.03)'
-                            }}>
-                                <label style={{
-                                    color: '#174ea6',
-                                    fontWeight: 700,
-                                    fontSize: 13,
-                                    margin: 0,
-                                    whiteSpace: 'nowrap',
-                                    fontFamily: 'inherit'
-                                }}>
-                                    Periodo:
-                                </label>
+                            <div className="d-flex align-items-center gap-2" style={{ background: '#f6f8fa', borderRadius: 8, padding: '0.2rem 0.7rem', border: '1px solid #e5e7eb' }}>
+                                <label style={{ color: '#174ea6', fontWeight: 700, fontSize: 13, margin: 0, whiteSpace: 'nowrap' }}>Periodo:</label>
                                 <select
                                     value={groupBy}
                                     onChange={e => setGroupBy(e.target.value)}
                                     className="form-control"
-                                    style={{
-                                        width: '100px',
-                                        fontSize: 13,
-                                        padding: '0.15rem 0.3rem',
-                                        borderRadius: 5,
-                                        border: '1px solid #e5e7eb',
-                                        background: '#fff',
-                                        color: '#174ea6',
-                                        fontWeight: 600,
-                                        cursor: 'pointer',
-                                        outline: 'none',
-                                        transition: 'all 0.2s ease',
-                                        fontFamily: 'inherit'
-                                    }}
+                                    style={{ width: 100, fontSize: 13, padding: '0.15rem 0.1rem', borderRadius: 5, border: '1px solid #e5e7eb', background: '#fff', color: '#174ea6', fontWeight: 600, cursor: 'pointer', outline: 'none', transition: 'all 0.2s ease' }}
                                 >
                                     <option value="dia">Por Día</option>
                                     <option value="semana">Por Semana</option>
                                     <option value="mes">Por Mes</option>
                                 </select>
                             </div>
-                            <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                background: '#fff',
-                                padding: '0.2rem 0.7rem',
-                                borderRadius: '7px',
-                                border: '1px solid #e5e7eb',
-                                boxShadow: '0 1px 2px rgba(23,78,166,0.03)'
-                            }}>
-                                <label style={{
-                                    color: '#174ea6',
-                                    fontWeight: 700,
-                                    fontSize: 13,
-                                    margin: 0,
-                                    whiteSpace: 'nowrap',
-                                    fontFamily: 'inherit'
-                                }}>
-                                    Impacto:
-                                </label>
+                            <div className="d-flex align-items-center gap-2" style={{ background: '#f6f8fa', borderRadius: 8, padding: '0.2rem 0.7rem', border: '1px solid #e5e7eb' }}>
+                                <label style={{ color: '#174ea6', fontWeight: 700, fontSize: 13, margin: 0, whiteSpace: 'nowrap' }}>Impacto:</label>
                                 <select
                                     value={impactFilter}
                                     onChange={e => setImpactFilter(e.target.value)}
                                     className="form-control"
-                                    style={{
-                                        width: '100px',
-                                        fontSize: 13,
-                                        padding: '0.15rem 0.3rem',
-                                        borderRadius: 5,
-                                        border: '1px solid #e5e7eb',
-                                        background: '#fff',
-                                        color: '#174ea6',
-                                        fontWeight: 600,
-                                        cursor: 'pointer',
-                                        outline: 'none',
-                                        transition: 'all 0.2s ease',
-                                        fontFamily: 'inherit'
-                                    }}
+                                    style={{ width: 100, fontSize: 13, padding: '0.15rem 0.3rem', borderRadius: 5, border: '1px solid #e5e7eb', background: '#fff', color: '#174ea6', fontWeight: 600, cursor: 'pointer', outline: 'none', transition: 'all 0.2s ease' }}
                                 >
                                     <option value="all">Todos</option>
                                     <option value="ALTO">Alto Impacto</option>
@@ -992,17 +921,19 @@ const Statistics = () => {
                                 </select>
                             </div>
                         </div>
-
-                        {/* Leyenda personalizada de cuadrantes (ahora arriba) */}
+                        {/* Leyenda personalizada de cuadrantes (arriba, igual que la tercera gráfica) */}
                         <div className="custom-quadrant-legend" style={{
+                            paddingLeft: '3rem',
+                            paddingRight: '3rem',
+                            margin: '0 0 28px 0',
+                            padding: '0.7rem 0',
+                            fontFamily: 'inherit',
+                            fontSize: 16,
+                            rowGap: '1rem',
                             display: 'flex',
                             flexWrap: 'wrap',
                             justifyContent: 'center',
-                            gap: '1.1rem',
-                            margin: '0 0 18px 0',
-                            padding: '0.5rem 0',
-                            fontFamily: 'inherit',
-                            fontSize: 14,
+                            gap: '1.3rem',
                         }}>
                             {allQuadrants.map((q, idx) => (
                                 <button
@@ -1018,8 +949,8 @@ const Statistics = () => {
                                     style={{
                                         display: 'flex',
                                         alignItems: 'center',
-                                        gap: 7,
-                                        minWidth: 110,
+                                        gap: 9,
+                                        minWidth: 120,
                                         background: 'none',
                                         border: 'none',
                                         cursor: 'pointer',
@@ -1027,16 +958,17 @@ const Statistics = () => {
                                         outline: 'none',
                                         transition: 'opacity 0.2s',
                                         padding: 0,
+                                        fontSize: 15,
                                     }}
                                     aria-pressed={visibleQuadrants[idx]}
                                 >
                                     <span style={{
                                         display: 'inline-block',
-                                        width: 18,
-                                        height: 18,
+                                        width: 20,
+                                        height: 20,
                                         borderRadius: '50%',
                                         background: quadrantColors[idx % quadrantColors.length],
-                                        marginRight: 6,
+                                        marginRight: 7,
                                         border: visibleQuadrants[idx] ? '2px solid #e5e7eb' : '2px solid #cbd5e1',
                                         filter: visibleQuadrants[idx] ? 'none' : 'grayscale(0.7) brightness(1.2)',
                                     }}></span>
@@ -1044,22 +976,8 @@ const Statistics = () => {
                                 </button>
                             ))}
                         </div>
-                        <div className="card-body quadrant-graph-responsive"
-                            style={{
-                                height: 480,
-                                display: 'flex',
-                                flexDirection: 'row',
-                                alignItems: 'stretch',
-                                gap: 18,
-                                padding: '0rem 1.5rem 3rem 1.5rem',
-                                minWidth: 900,
-                                overflowX: 'auto',
-                                overflowY: 'visible',
-                                boxSizing: 'border-box',
-                                width: '100%'
-                            }}
-                        >
-                            <div style={{ flex: 1, minHeight: 320, minWidth: 0, paddingTop: '0.5rem', width: '100%' }}>
+                        <div className="card-body" style={{ padding: '2.5rem 2.5rem 1.5rem 2.5rem', height: 420, minHeight: 320, maxHeight: 540, display: 'flex', flexDirection: 'column', justifyContent: 'center', borderRadius: 18 }}>
+                            <div style={{ display: 'flex', flexDirection: 'row', flex: 1, minWidth: 0, width: '100%', height: 400, maxHeight: 480, paddingTop: '0.5rem', overflowX: 'auto' }}>
                                 <Line
                                     data={{
                                         ...periodQuadrantLineData,
@@ -1109,65 +1027,69 @@ const Statistics = () => {
                                             }
                                         }
                                     }}
+                                    height={400}
+                                    plugins={[ChartDataLabels]}
                                 />
                             </div>
                         </div>
+                        <div style={{
+                            paddingLeft: '3rem',
+                            paddingRight: '3rem',
+                            paddingBottom: '2.5rem'
+                        }}>
+                            <div className="quadrant-summary-title-row">
+                                <h4 style={{ color: '#174ea6', marginBottom: '0.7rem', fontSize: '1.05rem', fontWeight: '700', letterSpacing: '-0.5px' }}>Resumen por Cuadrante</h4>
+                            </div>
+                            <div className="quadrant-summary-grid">
+                                {allQuadrants.map((quadrant) => {
+                                    const quadrantIncidents = filteredQuadrant.filter(i => i.quadrant === quadrant);
+                                    const altoImpact = quadrantIncidents.filter(i => i.crimeImpact === 'ALTO').length;
+                                    const bajoImpact = quadrantIncidents.filter(i => i.crimeImpact === 'BAJO').length;
+                                    const totalIncidents = altoImpact + bajoImpact;
+                                    const hasIncidents = totalIncidents > 0;
 
-                        {/* Título Resumen por Cuadrante */}
-                        <div className="quadrant-summary-title-row">
-                            <h4 style={{ color: '#174ea6', marginBottom: '0.7rem', fontSize: '1.05rem', fontWeight: '700', letterSpacing: '-0.5px' }}>Resumen por Cuadrante</h4>
-                        </div>
-                        {/* Contador de incidentes por cuadrante compacto y elegante */}
-                        <div className="quadrant-summary-grid">
-                            {allQuadrants.map((quadrant) => {
-                                const quadrantIncidents = filteredQuadrant.filter(i => i.quadrant === quadrant);
-                                const altoImpact = quadrantIncidents.filter(i => i.crimeImpact === 'ALTO').length;
-                                const bajoImpact = quadrantIncidents.filter(i => i.crimeImpact === 'BAJO').length;
-                                const totalIncidents = altoImpact + bajoImpact;
-                                const hasIncidents = totalIncidents > 0;
-
-                                return (
-                                    <div
-                                        key={quadrant}
-                                        className={`quadrant-card ${hasIncidents ? 'has-incidents' : ''}`}
-                                    >
-                                        {hasIncidents && (
-                                            <div className="quadrant-badge">
-                                                {totalIncidents}
-                                            </div>
-                                        )}
-                                        <h5 className="quadrant-title">
-                                            Cuadrante {quadrant}
-                                        </h5>
-                                        <div className="quadrant-stats">
-                                            <div>
-                                                <span style={{ color: '#ef4444', fontWeight: '700' }}>{altoImpact}</span>
-                                                <span style={{ color: '#ef4444', fontSize: '0.85rem', fontWeight: 700 }}> Alto</span>
-                                            </div>
-                                            <div>
-                                                <span style={{ color: '#f59e0b', fontWeight: '700' }}>{bajoImpact}</span>
-                                                <span style={{ color: '#f59e0b', fontSize: '0.85rem', fontWeight: 700 }}> Bajo</span>
-                                            </div>
-                                            <div>
-                                                <span style={{ color: '#174ea6', fontWeight: '700' }}>{totalIncidents}</span>
-                                                <span style={{ color: '#64748b', fontSize: '0.85rem', fontWeight: 500 }}> Total</span>
-                                            </div>
-                                        </div>
-                                        <button
-                                            className="quadrant-button"
-                                            onClick={() => {
-                                                setSelectedQuadrant(quadrant);
-                                                setShowModal(true);
-                                            }}
-                                            disabled={!hasIncidents}
+                                    return (
+                                        <div
+                                            key={quadrant}
+                                            className={`quadrant-card ${hasIncidents ? 'has-incidents' : ''}`}
                                         >
-                                            {hasIncidents ? 'Ver Detalles' : 'Sin Incidentes'}
-                                        </button>
-                                    </div>
-                                );
-                            })}
+                                            {hasIncidents && (
+                                                <div className="quadrant-badge">
+                                                    {totalIncidents}
+                                                </div>
+                                            )}
+                                            <h5 className="quadrant-title">
+                                                Cuadrante {quadrant}
+                                            </h5>
+                                            <div className="quadrant-stats">
+                                                <div>
+                                                    <span style={{ color: '#ef4444', fontWeight: '700' }}>{altoImpact}</span>
+                                                    <span style={{ color: '#ef4444', fontSize: '0.85rem', fontWeight: 700 }}> Alto</span>
+                                                </div>
+                                                <div>
+                                                    <span style={{ color: '#f59e0b', fontWeight: '700' }}>{bajoImpact}</span>
+                                                    <span style={{ color: '#f59e0b', fontSize: '0.85rem', fontWeight: 700 }}> Bajo</span>
+                                                </div>
+                                                <div>
+                                                    <span style={{ color: '#174ea6', fontWeight: '700' }}>{totalIncidents}</span>
+                                                    <span style={{ color: '#64748b', fontSize: '0.85rem', fontWeight: 500 }}> Total</span>
+                                                </div>
+                                            </div>
+                                            <button
+                                                className="quadrant-button"
+                                                onClick={() => {
+                                                    setSelectedQuadrant(quadrant);
+                                                    setShowModal(true);
+                                                }}
+                                                disabled={!hasIncidents}
+                                            >
+                                                {hasIncidents ? 'Ver Detalles' : 'Sin Incidentes'}
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
-
                         {/* Modal para mostrar detalles del cuadrante */}
                         {showModal && (
                             <div className="quadrant-modal-overlay">

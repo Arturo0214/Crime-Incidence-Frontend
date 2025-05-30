@@ -1787,6 +1787,46 @@
         height: 60vh !important;
         overflow-y: auto !important;
     }
+
+    .map-filters-compact {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(4, auto);
+        gap: 8px;
+        padding: 8px;
+        background: linear-gradient(90deg, #2563eb 0%, #1e3a8a 100%);
+        border-radius: 8px;
+        margin-bottom: 8px;
+        max-height: 280px;
+        overflow-y: auto;
+    }
+
+    .map-filters-compact>div {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .filter-label {
+        font-size: 12px;
+        color: #ffffff;
+        margin-bottom: 2px;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .filter-input {
+        font-size: 12px;
+        padding: 6px 8px;
+        height: 32px;
+        background-color: rgba(255, 255, 255, 0.95);
+    }
+
+    .map-filters-compact input[type="date"] {
+        font-size: 12px;
+        padding: 6px 8px;
+        height: 32px;
+        background-color: rgba(255, 255, 255, 0.95);
+    }
 }
 
 /* --- Mejora profesional para la sección de Tipos de Delitos en el popup de cuadrante --- */
