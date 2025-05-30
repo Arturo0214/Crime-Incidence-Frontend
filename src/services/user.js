@@ -1,9 +1,8 @@
-import axios from './axiosConfig';
-export const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+import axiosInstance from './axiosConfig';
 
 export const register = async (userData) => {
     try {
-        const response = await axios.post('/users/register', userData);
+        const response = await axiosInstance.post('/users/register', userData);
         return response.data;
     } catch (error) {
         console.error('Error during registration:', error);
@@ -13,7 +12,7 @@ export const register = async (userData) => {
 
 export const login = async (credentials) => {
     try {
-        const response = await axios.post('/users/login', credentials);
+        const response = await axiosInstance.post('/users/login', credentials);
         return response.data;
     } catch (error) {
         console.error('Error during login:', error);
@@ -23,7 +22,7 @@ export const login = async (credentials) => {
 
 export const getUsers = async () => {
     try {
-        const response = await axios.get('/users');
+        const response = await axiosInstance.get('/users');
         return response.data;
     } catch (error) {
         console.error('Error fetching users:', error);
@@ -32,8 +31,13 @@ export const getUsers = async () => {
 };
 
 export const deleteUser = async (id) => {
-    const response = await axios.delete(`${API_URL}/users/${id}`);
-    return response.data;
+    try {
+        const response = await axiosInstance.delete(`/users/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        throw error;
+    }
 };
 
 // Utilidad para obtener el usuario actual desde el JWT guardado en localStorage

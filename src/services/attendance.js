@@ -1,7 +1,5 @@
 import axiosInstance from './axiosConfig';
 
-export const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
-
 export const createAttendance = async (attendanceData) => {
     try {
         console.log('Registrando asistencia en:', '/attendance');

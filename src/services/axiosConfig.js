@@ -4,9 +4,10 @@ import axios from 'axios';
 const instance = axios.create({
     baseURL: 'https://crime-incidence-backend.onrender.com/api',
     headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
     },
-    withCredentials: true
+    withCredentials: false
 });
 
 // Response interceptor for error handling
