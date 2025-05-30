@@ -51,7 +51,9 @@ const SpecialInstructions = () => {
             await dispatch(createInstruction(newInstruction)).unwrap();
             setNewInstruction({ title: '', description: '' });
             dispatch(fetchInstructions());
-        } catch (err) { }
+        } catch (err) {
+            console.error('Error creating instruction:', err);
+        }
         setCreating(false);
     };
 
@@ -60,7 +62,9 @@ const SpecialInstructions = () => {
         try {
             await dispatch(updateInstructionStatus({ id, status })).unwrap();
             dispatch(fetchInstructions());
-        } catch (err) { }
+        } catch (err) {
+            console.error('Error updating instruction status:', err);
+        }
         setStatusUpdating(s => ({ ...s, [id]: false }));
     };
 
@@ -70,7 +74,9 @@ const SpecialInstructions = () => {
             await dispatch(addInstructionComment({ id, text: commentText[id], author: getUserName() })).unwrap();
             setCommentText(t => ({ ...t, [id]: '' }));
             dispatch(fetchInstructions());
-        } catch (err) { }
+        } catch (err) {
+            console.error('Error adding comment:', err);
+        }
     };
 
     const handleDelete = async (id) => {
@@ -78,7 +84,9 @@ const SpecialInstructions = () => {
         try {
             await dispatch(deleteInstruction(id)).unwrap();
             dispatch(fetchInstructions());
-        } catch (err) { }
+        } catch (err) {
+            console.error('Error deleting instruction:', err);
+        }
     };
 
     const handleEditComment = async (id, commentIdx) => {
@@ -87,14 +95,18 @@ const SpecialInstructions = () => {
             setEditingComment(ec => ({ ...ec, [`${id}_${commentIdx}`]: false }));
             setEditCommentText(et => ({ ...et, [`${id}_${commentIdx}`]: '' }));
             dispatch(fetchInstructions());
-        } catch (err) { }
+        } catch (err) {
+            console.error('Error editing comment:', err);
+        }
     };
 
     const handleDeleteComment = async (id, commentIdx) => {
         try {
             await dispatch(removeInstructionComment({ id, commentIdx })).unwrap();
             dispatch(fetchInstructions());
-        } catch (err) { }
+        } catch (err) {
+            console.error('Error removing comment:', err);
+        }
     };
 
     return (
