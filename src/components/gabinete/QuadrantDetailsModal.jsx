@@ -15,7 +15,6 @@ const QuadrantDetailsModal = ({
     getQuadrantColor,
     setModalSelectedIncident,
     modalSelectedIncident,
-    handleEditIncident,
     getStatusBadgeClass,
     INCIDENT_TYPES,
     mapRef

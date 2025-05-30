@@ -53,9 +53,9 @@ const Attendance = () => {
         if (dayOfWeek === 0) dayOfWeek = 7;
         const monday = new Date(jan4);
         monday.setDate(jan4.getDate() - (dayOfWeek - 1) + (week - 1) * 7);
-        return Array.from({ length: 5 }, (_, i) => {
+        return Array.from({ length: 5 }, (_, index) => {
             const d = new Date(monday);
-            d.setDate(monday.getDate() + i);
+            d.setDate(monday.getDate() + index);
             d.setHours(0, 0, 0, 0);
             return d;
         });
@@ -380,7 +380,7 @@ const Attendance = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {participants.map((participant, i) => (
+                                    {participants.map((participant) => (
                                         <tr key={participant.id}>
                                             <td>{participant.name}</td>
                                             <td>

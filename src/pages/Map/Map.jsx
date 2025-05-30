@@ -17,22 +17,6 @@ L.Icon.Default.mergeOptions({
     shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
 
-// Definir los límites de los cuadrantes
-const QUADRANT_BOUNDS = {
-    1: { minLat: 19.4565, maxLat: 19.4575, minLng: -99.1415, maxLng: -99.1405 },
-    2: { minLat: 19.4565, maxLat: 19.4575, minLng: -99.1425, maxLng: -99.1415 },
-    3: { minLat: 19.4565, maxLat: 19.4575, minLng: -99.1435, maxLng: -99.1425 },
-    4: { minLat: 19.4555, maxLat: 19.4565, minLng: -99.1415, maxLng: -99.1405 },
-    5: { minLat: 19.4555, maxLat: 19.4565, minLng: -99.1425, maxLng: -99.1415 },
-    6: { minLat: 19.4555, maxLat: 19.4565, minLng: -99.1435, maxLng: -99.1425 },
-    7: { minLat: 19.4545, maxLat: 19.4555, minLng: -99.1415, maxLng: -99.1405 },
-    8: { minLat: 19.4545, maxLat: 19.4555, minLng: -99.1425, maxLng: -99.1415 },
-    9: { minLat: 19.4545, maxLat: 19.4555, minLng: -99.1435, maxLng: -99.1425 },
-    10: { minLat: 19.4535, maxLat: 19.4545, minLng: -99.1415, maxLng: -99.1405 },
-    11: { minLat: 19.4535, maxLat: 19.4545, minLng: -99.1425, maxLng: -99.1415 },
-    12: { minLat: 19.4535, maxLat: 19.4545, minLng: -99.1435, maxLng: -99.1425 }
-};
-
 const INCIDENT_TYPES = {
     CRIME: 'Delito',
     TREE_TRIMMING: 'Poda de árboles',
@@ -137,17 +121,6 @@ const Map = ({ onQuadrantClick }) => {
             if (mapRef.current) mapRef.current.off('zoomend', handleZoom);
         };
     }, [mapRef]);
-
-    // Función para determinar el cuadrante basado en coordenadas
-    const getQuadrantForCoordinates = (lat, lng) => {
-        for (const [quadrant, bounds] of Object.entries(QUADRANT_BOUNDS)) {
-            if (lat >= bounds.minLat && lat <= bounds.maxLat &&
-                lng >= bounds.minLng && lng <= bounds.maxLng) {
-                return parseInt(quadrant);
-            }
-        }
-        return null;
-    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -320,15 +293,6 @@ const Map = ({ onQuadrantClick }) => {
         });
     };
 
-    // Función para obtener el número de semana ISO
-    function getWeekNumber(date) {
-        const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-        const dayNum = d.getUTCDay() || 7;
-        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-        return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-    }
-
     // Usar los incidentes filtrados en todos los conteos y visualizaciones
     const getQuadrantIncidents = (quadrantNumber) => {
         // Primero filtramos por cuadrante
@@ -381,27 +345,7 @@ const Map = ({ onQuadrantClick }) => {
         if (count < 6) return '#FF9800'; // Naranja
         return '#F44336'; // Rojo
     };
-
-    const getCrimeStatistics = (quadrantNumber) => {
-        const quadrantIncidents = getQuadrantIncidents(quadrantNumber);
-        const statistics = {
-            total: quadrantIncidents.length,
-            highImpact: quadrantIncidents.filter(i => i.crimeImpact === 'ALTO').length,
-            lowImpact: quadrantIncidents.filter(i => i.crimeImpact === 'BAJO').length,
-            byType: {}
-        };
-
-        // Contar incidentes por tipo
-        quadrantIncidents.forEach(incident => {
-            if (!statistics.byType[incident.crimeType]) {
-                statistics.byType[incident.crimeType] = 0;
-            }
-            statistics.byType[incident.crimeType]++;
-        });
-
-        return statistics;
-    };
-
+    
     const cuadranteStyle = (feature) => {
         try {
             const quadrantNumber = feature.properties.no_cdrn;
@@ -536,7 +480,7 @@ const Map = ({ onQuadrantClick }) => {
             } else if (incident.crimeImpact === 'BAJO') {
                 iconHtml = `<div style="color: #fbbf24; font-size: 20px;"><i class="fa-solid fa-exclamation-triangle"></i></div>`;
             } else {
-                iconHtml = `<div style=\"color: #adb5bd; font-size: 20px;\"><i class=\"fa-solid fa-exclamation-triangle\"></i></div>`;
+                iconHtml = `<div style="color: #adb5bd; font-size: 20px;"><i class="fa-solid fa-exclamation-triangle"></i></div>`;
             }
         } else {
             let iconColor = incident.crimeImpact === 'ALTO' ? '#ff4444' : '#ffbb33';
@@ -820,8 +764,6 @@ const Map = ({ onQuadrantClick }) => {
             </div>
         );
     }
-
-    const statistics = selectedQuadrant ? getCrimeStatistics(selectedQuadrant) : null;
 
     return (
         <div className="container-fluid">

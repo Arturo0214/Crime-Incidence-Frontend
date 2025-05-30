@@ -1,11 +1,6 @@
 import axiosInstance from './axiosConfig';
 
-export const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
-
-const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
-    return token ? { Authorization: `Bearer ${token}` } : {};
-};
+export const API_URL = process.env.REACT_APP_API_URL || 'https://crime-incidence-backend.onrender.com/api';
 
 export const getAgreements = async () => {
     try {

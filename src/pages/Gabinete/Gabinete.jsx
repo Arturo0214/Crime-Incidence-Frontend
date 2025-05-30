@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Container, Row, Col, Card, Nav, Tab, Button, Form, Modal } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { isAdmin } from '../../utils/auth';
 import { getIncidents } from '../../services/incidents';
@@ -12,7 +11,7 @@ import SpecialInstructions from '../../components/gabinete/SpecialInstructions';
 import CitizenRequests from '../../components/gabinete/CitizenRequests';
 import 'leaflet/dist/leaflet.css';
 import MiniIncidentMap from '../../components/gabinete/MiniIncidentMap';
-import { INCIDENT_TYPES, getWeekNumber, getStatusBadgeClass } from '../../constants';
+import { INCIDENT_TYPES, getStatusBadgeClass } from '../../constants';
 import QuadrantStats from './QuadrantStats';
 import Agreements from '../../components/gabinete/Agreements';
 import QuadrantDetailsModal from '../../components/gabinete/QuadrantDetailsModal';
@@ -27,7 +26,6 @@ const Gabinete = () => {
     const [incidents, setIncidents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const navigate = useNavigate();
     const [selectedQuadrant, setSelectedQuadrant] = useState(null);
     const [showQuadrantDetails, setShowQuadrantDetails] = useState(false);
     const [filteredIncidents, setFilteredIncidents] = useState([]);
@@ -50,22 +48,22 @@ const Gabinete = () => {
     const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().split('T')[0].split('-')[1]);
     const mapRef = useRef();
     const [modalSelectedIncident, setModalSelectedIncident] = useState(null);
-    // Estados para feedback de guardado/edición de incidentes
     const [saving, setSaving] = useState(false);
     const [saveError, setSaveError] = useState(null);
     const [saveSuccess, setSaveSuccess] = useState(null);
+
+    // Función para obtener el número de semana
+    const getWeekNumber = (d) => {
+        d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        return weekNo;
+    };
+
     const [selectedWeek, setSelectedWeek] = useState(() => {
-        // Valor inicial: semana actual en formato 'YYYY-Www'
         const now = new Date();
         const year = now.getFullYear();
-        // Obtener semana ISO
-        const getWeekNumber = d => {
-            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-            const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-            return weekNo;
-        };
         const week = String(getWeekNumber(now)).padStart(2, '0');
         return `${year}-W${week}`;
     });
@@ -170,7 +168,7 @@ const Gabinete = () => {
                 const data = await getAttendance();
                 setAttendance(data);
             } catch (err) {
-                // Puedes mostrar un error si lo deseas
+                console.error('Error al cargar asistencias:', err);
             }
         };
         fetchAttendance();
@@ -248,11 +246,7 @@ const Gabinete = () => {
             location: {
                 street: incident.location.street,
                 coordinates: incident.location.coordinates
-            },
-            date: incident.date,
-            description: incident.description,
-            reportedBy: incident.reportedBy,
-            status: incident.status
+            }
         });
     };
 
@@ -309,6 +303,11 @@ const Gabinete = () => {
         setEditForm({});
         setSaveError(null);
         setSaveSuccess(null);
+    };
+
+    // Función para manejar el cambio de semana
+    const handleWeekChange = (week) => {
+        setSelectedWeek(week);
     };
 
     // Lógica de filtrado local para el modal
@@ -475,7 +474,25 @@ const Gabinete = () => {
     }, []);
 
     // --- Variables para el mapa del modal de cuadrante ---
-    let modalMapCenter = [19.4555, -99.1405];
+    const modalMapCenter = useMemo(() => {
+        if (cuadrantesData && selectedQuadrant) {
+            const modalGeoFeature = cuadrantesData.features.find(f => f.properties.no_cdrn === selectedQuadrant.properties.no_cdrn);
+            if (modalGeoFeature) {
+                try {
+                    const turfBbox = bbox(modalGeoFeature);
+                    // bbox: [minX, minY, maxX, maxY] => [west, south, east, north]
+                    return [
+                        (turfBbox[1] + turfBbox[3]) / 2, // (south + north) / 2 = lat
+                        (turfBbox[0] + turfBbox[2]) / 2  // (west + east) / 2 = lng
+                    ];
+                } catch (error) {
+                    console.error('Error al calcular los límites del mapa:', error);
+                }
+            }
+        }
+        return [19.4555, -99.1405]; // Valor por defecto
+    }, [cuadrantesData, selectedQuadrant]);
+
     let modalGeoFeature = null;
     let modalBounds = null;
     if (cuadrantesData && selectedQuadrant) {
@@ -483,11 +500,6 @@ const Gabinete = () => {
         if (modalGeoFeature) {
             try {
                 const turfBbox = bbox(modalGeoFeature);
-                // bbox: [minX, minY, maxX, maxY] => [west, south, east, north]
-                modalMapCenter = [
-                    (turfBbox[1] + turfBbox[3]) / 2, // (south + north) / 2 = lat
-                    (turfBbox[0] + turfBbox[2]) / 2  // (west + east) / 2 = lng
-                ];
                 modalBounds = [
                     [turfBbox[1], turfBbox[0]], // [south, west]
                     [turfBbox[3], turfBbox[2]]  // [north, east]
@@ -657,13 +669,21 @@ const Gabinete = () => {
                             getStatusBadgeClass={getStatusBadgeClass}
                             INCIDENT_TYPES={INCIDENT_TYPES}
                             mapRef={mapRef}
+                            saving={saving}
+                            saveError={saveError}
+                            saveSuccess={saveSuccess}
+                            selectedWeek={selectedWeek}
+                            setSelectedWeek={setSelectedWeek}
                         />
                     )}
                 </Tab.Pane>
 
                 {/* Sección de Asistencia */}
                 <Tab.Pane active={activeTab === 'asistencia'}>
-                    <Attendance />
+                    <Attendance
+                        selectedWeek={selectedWeek}
+                        onWeekChange={handleWeekChange}
+                    />
                 </Tab.Pane>
 
                 {/* Sección de Acuerdos */}
