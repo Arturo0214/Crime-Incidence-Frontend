@@ -228,6 +228,26 @@ const Map = ({ onQuadrantClick }) => {
         setFilters(prev => ({ ...prev, ...newFilters }));
     };
 
+    // Función para verificar si un incidente está en el rango de fechas
+    const isIncidentInRange = (incidentDate) => {
+        const date = new Date(incidentDate);
+        date.setHours(date.getHours() - 6);
+
+        if (filters.from) {
+            const from = new Date(filters.from);
+            from.setHours(0, 0, 0, 0);
+            if (date < from) return false;
+        }
+
+        if (filters.to) {
+            const to = new Date(filters.to);
+            to.setHours(23, 59, 59, 999);
+            if (date > to) return false;
+        }
+
+        return true;
+    };
+
     // Función para filtrar incidentes según los filtros seleccionados
     const filterIncidents = (incidents) => {
         if (!incidents || incidents.length === 0) return [];
@@ -245,14 +265,9 @@ const Map = ({ onQuadrantClick }) => {
                 // Filtro por día
                 if (filters.date) {
                     const incidentDate = new Date(incident.date);
-                    // Ajustar la fecha del incidente a la zona horaria local (restar 6 horas)
                     incidentDate.setHours(incidentDate.getHours() - 6);
-
                     const selectedDate = new Date(filters.date);
-                    // Asegurar que la fecha seleccionada esté en el inicio del día
                     selectedDate.setHours(0, 0, 0, 0);
-
-                    // Comparar solo año, mes y día
                     if (
                         incidentDate.getFullYear() !== selectedDate.getFullYear() ||
                         incidentDate.getMonth() !== selectedDate.getMonth() ||
@@ -263,22 +278,8 @@ const Map = ({ onQuadrantClick }) => {
                 }
 
                 // Filtro por rango de fechas
-                if (filters.from || filters.to) {
-                    const incidentDate = new Date(incident.date);
-                    // Ajustar la fecha del incidente a la zona horaria local (restar 6 horas)
-                    incidentDate.setHours(incidentDate.getHours() - 6);
-
-                    if (filters.from) {
-                        const fromDate = new Date(filters.from);
-                        fromDate.setHours(0, 0, 0, 0);
-                        if (incidentDate < fromDate) return false;
-                    }
-
-                    if (filters.to) {
-                        const toDate = new Date(filters.to);
-                        toDate.setHours(23, 59, 59, 999);
-                        if (incidentDate > toDate) return false;
-                    }
+                if ((filters.from || filters.to) && !isIncidentInRange(incident.date)) {
+                    return false;
                 }
 
                 // Filtro por reportado por
@@ -436,7 +437,18 @@ const Map = ({ onQuadrantClick }) => {
     const onEachCuadrante = (feature, layer) => {
         try {
             const quadrantNumber = feature.properties.no_cdrn;
-            const statistics = getCrimeStatistics(quadrantNumber);
+            // Usar incidentes filtrados por cuadrante y por todos los filtros activos
+            const quadrantIncidents = filterIncidents(incidents.filter(incident => incident.quadrant === quadrantNumber));
+            const statistics = {
+                total: quadrantIncidents.length,
+                highImpact: quadrantIncidents.filter(i => i.crimeImpact === 'ALTO').length,
+                lowImpact: quadrantIncidents.filter(i => i.crimeImpact === 'BAJO').length,
+                byType: {}
+            };
+            quadrantIncidents.forEach(incident => {
+                if (!statistics.byType[incident.crimeType]) statistics.byType[incident.crimeType] = 0;
+                statistics.byType[incident.crimeType]++;
+            });
 
             // Aplicar el estilo inicial según los filtros activos
             const initialStyle = cuadranteStyle(feature);
@@ -937,7 +949,7 @@ const Map = ({ onQuadrantClick }) => {
                             />
                             {cuadrantesData && (
                                 <GeoJSON
-                                    key={filters.date + filters.impact + filters.week}
+                                    key={`${filters.date}-${filters.from}-${filters.to}-${filters.impact}-${filters.incidentType}`}
                                     data={cuadrantesData}
                                     style={cuadranteStyle}
                                     onEachFeature={onEachCuadrante}

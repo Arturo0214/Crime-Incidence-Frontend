@@ -32,11 +32,12 @@
 }
 
 /* Filtros compactos */
-.modal-filters {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+.modal-filters,
+.qd-filtros {
+    /* display: flex; */
+    /* flex-direction: column; */
+    /* align-items: center; */
+    /* justify-content: center; */
     background: #f4f6fa;
     border-bottom: 1px solid #e9ecef;
     border-radius: 0 0 10px 10px;
@@ -208,16 +209,37 @@
 
     .modal-map-container {
         height: 180px !important;
-        padding: 0 2px !important;
+        min-height: 120px !important;
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+        border-radius: 0 !important;
+        z-index: auto !important;
     }
 
     .details-card {
-        padding: 8px 4px;
-        max-width: 98vw;
+        position: static !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        z-index: auto !important;
     }
 
-    .incidents-list.incidents-list-full {
-        padding: 0.2rem 0.1rem 0.2rem 0.1rem !important;
+    .incidents-list,
+    .incidents-list-full {
+        margin-top: 24px !important;
+    }
+
+    .quadrant-details-modal .modal-body {
+        padding-bottom: 0 !important;
+        max-height: 100vh;
+        overflow-y: auto;
+    }
+
+    .quadrant-details-modal .modal-content {
+        max-height: 100vh;
+        overflow-y: auto;
     }
 }
 
@@ -274,19 +296,6 @@ input[type="month"]::-webkit-calendar-picker-indicator {
 }
 
 /* --- MEJORA VISUAL DE FILTROS --- */
-.qd-filtros {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: #f7fafd;
-    border-bottom: 1px solid #e3e7ee;
-    border-radius: 0 0 12px 12px;
-    margin-bottom: 0.2rem;
-    padding: 14px 24px 10px 24px;
-    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.03);
-}
-
 .qd-filtros-row {
     display: flex;
     flex-wrap: nowrap;
@@ -295,45 +304,37 @@ input[type="month"]::-webkit-calendar-picker-indicator {
     gap: 12px;
 }
 
-.qd-filtro-buscar {
-    flex: 1 1 0%;
-    min-width: 0;
-    max-width: 100%;
-    font-size: 1.18rem;
-    border-radius: 15px;
-    border: 1.5px solid #b3d1f7;
-    padding: 0.85rem 1.2rem 0.85rem 2.5rem;
-    background: #f0f4fa url('data:image/svg+xml;utf8,<svg fill="%2399a" height="18" viewBox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99c.41.41 1.09.41 1.5 0s.41-1.09 0-1.5l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>') no-repeat 16px center;
-    color: #111;
-    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.06);
-    transition: border-color 0.2s, box-shadow 0.2s;
-    margin-bottom: 0;
-}
-
-.qd-filtro-buscar:focus {
-    border-color: #3498db;
-    box-shadow: 0 0 0 2px #3498db22;
-    outline: none;
-    background-color: #eaf3fb;
+.qd-filtro-buscar,
+.qd-filtro-limpiar {
+    height: 48px !important;
+    border-radius: 12px !important;
+    font-size: 1.13rem !important;
+    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08) !important;
+    padding: 0.85rem 1.2rem 0.85rem 2.5rem !important;
+    border: 1.5px solid #b3d1f7 !important;
+    background: #f8fafc url('data:image/svg+xml;utf8,<svg fill="%2399a" height="18" viewBox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99c.41.41 1.09.41 1.5 0s.41-1.09 0-1.5l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>') no-repeat 16px center !important;
+    color: #222 !important;
 }
 
 .qd-filtro-limpiar {
-    margin-left: 12px;
     height: 48px !important;
-    min-width: 110px;
-    font-size: 1.08rem !important;
     border-radius: 12px !important;
+    font-size: 1.13rem !important;
+    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08) !important;
+    padding: 0.85rem 1.2rem !important;
+    border: 1.5px solid #b3d1f7 !important;
     background: #fff !important;
     color: #2563eb !important;
-    border: 1.5px solid #b3d1f7 !important;
     font-weight: 500;
-    box-shadow: 0 1px 6px rgba(44, 62, 80, 0.04);
+    text-align: center;
     transition: background 0.2s, color 0.2s;
 }
 
 .qd-filtro-limpiar:hover {
     background: #e3eaf7 !important;
     color: #1746a2 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
 }
 
 /* Segunda fila: todos los filtros alineados horizontalmente */
@@ -373,8 +374,14 @@ input[type="month"]::-webkit-calendar-picker-indicator {
 }
 
 .qd-filtro-item[type="date"] {
-    background: #fff url('data:image/svg+xml;utf8,<svg fill="%2399a" height="18" viewBox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zm0-13H5V6h14v1z"/></svg>') no-repeat 12px center !important;
+    background: #fff url('data:image/svg+xml;utf8,<svg fill="%23000" height="18" viewBox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zm0-13H5V6h14v1z"/></svg>') no-repeat 12px center !important;
     padding-left: 2.2rem !important;
+    color: #000 !important;
+}
+
+.qd-filtro-item[type="date"]::-webkit-calendar-picker-indicator {
+    filter: none !important;
+    opacity: 1 !important;
 }
 
 .qd-filtro-item:not([type="date"]):not([type="text"]) {
@@ -433,21 +440,6 @@ input[type="month"]::-webkit-calendar-picker-indicator {
         gap: 8px;
     }
 
-    .qd-filtro-buscar {
-        font-size: 1rem;
-        padding: 0.5rem 0.8rem 0.5rem 2.1rem;
-        height: 40px;
-    }
-
-    .qd-filtro-limpiar {
-        height: 40px !important;
-        min-width: 90px;
-        font-size: 0.98rem !important;
-        margin-left: 0;
-        margin-top: 6px;
-        align-self: flex-end;
-    }
-
     .qd-filtros-opciones {
         flex-direction: column;
         gap: 6px;
@@ -464,4 +456,85 @@ input[type="month"]::-webkit-calendar-picker-indicator {
         padding: 0.28rem 0.7rem 0.28rem 1.7rem !important;
         height: 32px !important;
     }
+}
+
+/* Ajustes para el botón limpiar */
+.qd-filtro-limpiar:hover {
+    background: #e3eaf7 !important;
+    color: #1746a2 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+}
+
+/* Ajustes para los labels */
+.small.fw-medium {
+    color: #111;
+    font-weight: 500 !important;
+}
+
+/* Filtros unificados: look profesional */
+.filtro-unificado {
+    background: #f8fafc;
+    border: 1.5px solid #b3d1f7;
+    border-radius: 12px;
+    box-shadow: 0 1px 6px rgba(44, 62, 80, 0.06);
+    font-size: 1rem;
+    height: 44px;
+    padding: 0.38rem 1.1rem 0.38rem 1.1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.filtro-unificado:focus {
+    border-color: #2563eb;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.10);
+    background: #fff;
+}
+
+/* Forzar color negro en los inputs de fecha */
+.filtro-date-black,
+.filtro-date-black:focus,
+.filtro-date-black::placeholder {
+    color: #111 !important;
+}
+
+/* Webkit browsers (Chrome, Safari) */
+.filtro-date-black::-webkit-input-placeholder {
+    color: #111 !important;
+}
+
+.filtro-date-black::-webkit-datetime-edit {
+    color: #111 !important;
+}
+
+.filtro-date-black::-webkit-datetime-edit-fields-wrapper {
+    color: #111 !important;
+}
+
+.filtro-date-black::-webkit-datetime-edit-text {
+    color: #111 !important;
+}
+
+.filtro-date-black::-webkit-datetime-edit-month-field {
+    color: #111 !important;
+}
+
+.filtro-date-black::-webkit-datetime-edit-day-field {
+    color: #111 !important;
+}
+
+.filtro-date-black::-webkit-datetime-edit-year-field {
+    color: #111 !important;
+}
+
+/* Firefox */
+.filtro-date-black:-moz-placeholder {
+    color: #111 !important;
+}
+
+.filtro-date-black::-moz-placeholder {
+    color: #111 !important;
+}
+
+.filtro-date-black::-ms-input-placeholder {
+    color: #111 !important;
 }

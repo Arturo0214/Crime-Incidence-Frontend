@@ -227,7 +227,6 @@ const Attendance = () => {
                     </thead>
                     <tbody>
                         {participants.map(part => {
-                            const totalWeek = summary[part.id].week.titular + summary[part.id].week.suplente + summary[part.id].week.ausente;
                             const totalMonth = summary[part.id].month.titular + summary[part.id].month.suplente + summary[part.id].month.ausente;
                             const asistenciasTitular = summary[part.id].month.titular;
                             const asistenciasSuplente = summary[part.id].month.suplente;

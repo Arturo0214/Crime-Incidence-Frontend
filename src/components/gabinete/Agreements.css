@@ -414,3 +414,31 @@
         margin-top: 2px;
     }
 }
+
+.date-filter-black {
+    color: black !important;
+    background-color: white !important;
+}
+
+.date-filter-black::-webkit-calendar-picker-indicator {
+    filter: invert(0) !important;
+    opacity: 1 !important;
+}
+
+.date-filter-black::-webkit-datetime-edit {
+    color: black !important;
+}
+
+.date-filter-black::-webkit-datetime-edit-fields-wrapper {
+    color: black !important;
+}
+
+.date-filter-black::-webkit-datetime-edit-text {
+    color: black !important;
+}
+
+.date-filter-black::-webkit-datetime-edit-month-field,
+.date-filter-black::-webkit-datetime-edit-day-field,
+.date-filter-black::-webkit-datetime-edit-year-field {
+    color: black !important;
+}

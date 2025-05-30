@@ -182,7 +182,7 @@ const Statistics = () => {
                 if (!map[day]) map[day] = { ALTO: 0, BAJO: 0 };
                 if (i.crimeImpact === 'ALTO') map[day].ALTO++;
                 else if (i.crimeImpact === 'BAJO') map[day].BAJO++;
-            } catch { }
+            } catch (error) { console.error(error); }
         });
         return map;
     };
@@ -198,8 +198,7 @@ const Statistics = () => {
                 }
                 const day = getLocalDateString(date);
                 map[day] = (map[day] || 0) + 1;
-            } catch (err) {
-            }
+            } catch (error) { console.error(error); }
         });
         return map;
     };
@@ -256,7 +255,8 @@ const Statistics = () => {
         }
         if (filters.to) {
             const toDate = new Date(filters.to);
-            pass = pass && new Date(i.date) <= toDate;
+            toDate.setDate(toDate.getDate() + 1);
+            pass = pass && new Date(i.date) < toDate;
         }
         if (filters.type !== 'all') {
             pass = pass && i.type === filters.type;
@@ -284,7 +284,8 @@ const Statistics = () => {
         }
         if (filters.to) {
             const toDate = new Date(filters.to);
-            pass = pass && new Date(i.date) <= toDate;
+            toDate.setDate(toDate.getDate() + 1);
+            pass = pass && new Date(i.date) < toDate;
         }
         if (filters.type !== 'all') {
             pass = pass && i.type === filters.type;
@@ -1118,7 +1119,7 @@ const Statistics = () => {
                         </div>
                         {/* Contador de incidentes por cuadrante compacto y elegante */}
                         <div className="quadrant-summary-grid">
-                            {allQuadrants.map((quadrant, idx) => {
+                            {allQuadrants.map((quadrant) => {
                                 const quadrantIncidents = filteredQuadrant.filter(i => i.quadrant === quadrant);
                                 const altoImpact = quadrantIncidents.filter(i => i.crimeImpact === 'ALTO').length;
                                 const bajoImpact = quadrantIncidents.filter(i => i.crimeImpact === 'BAJO').length;

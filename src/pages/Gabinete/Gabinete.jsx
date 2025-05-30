@@ -7,6 +7,7 @@ import { getIncidents } from '../../services/incidents';
 import { createAttendance, getAttendance } from '../../services/attendance';
 import './Gabinete.css';
 import * as turf from '@turf/turf';
+import bbox from '@turf/bbox';
 import SpecialInstructions from '../../components/gabinete/SpecialInstructions';
 import CitizenRequests from '../../components/gabinete/CitizenRequests';
 import 'leaflet/dist/leaflet.css';
@@ -176,7 +177,14 @@ const Gabinete = () => {
     }, []);
 
     const handleQuadrantClick = (quadrantNumber) => {
-        setSelectedQuadrant(quadrantNumber);
+        console.log('Click en cuadrante:', quadrantNumber);
+        const quadrantFeature = cuadrantesData.features.find(f => f.properties.no_cdrn === quadrantNumber);
+        if (!quadrantFeature) {
+            console.error('No se encontró el cuadrante:', quadrantNumber);
+            return;
+        }
+
+        setSelectedQuadrant(quadrantFeature);
         const quadrantIncidents = incidents.filter(incident => incident.quadrant === quadrantNumber);
         console.log(`Incidentes para cuadrante ${quadrantNumber}:`, quadrantIncidents);
         setFilteredIncidents(quadrantIncidents);
@@ -471,10 +479,10 @@ const Gabinete = () => {
     let modalGeoFeature = null;
     let modalBounds = null;
     if (cuadrantesData && selectedQuadrant) {
-        modalGeoFeature = cuadrantesData.features.find(f => f.properties.no_cdrn === selectedQuadrant);
+        modalGeoFeature = cuadrantesData.features.find(f => f.properties.no_cdrn === selectedQuadrant.properties.no_cdrn);
         if (modalGeoFeature) {
             try {
-                const turfBbox = require('@turf/turf').bbox(modalGeoFeature);
+                const turfBbox = bbox(modalGeoFeature);
                 // bbox: [minX, minY, maxX, maxY] => [west, south, east, north]
                 modalMapCenter = [
                     (turfBbox[1] + turfBbox[3]) / 2, // (south + north) / 2 = lat
@@ -484,7 +492,9 @@ const Gabinete = () => {
                     [turfBbox[1], turfBbox[0]], // [south, west]
                     [turfBbox[3], turfBbox[2]]  // [north, east]
                 ];
-            } catch { }
+            } catch (error) {
+                console.error('Error al calcular los límites del mapa:', error);
+            }
         }
     }
 
@@ -620,29 +630,35 @@ const Gabinete = () => {
                     </Row>
 
                     {/* Modal de Detalles del Cuadrante */}
-                    <QuadrantDetailsModal
-                        show={showQuadrantDetails}
-                        onHide={() => setShowQuadrantDetails(false)}
-                        selectedQuadrant={selectedQuadrant}
-                        cuadrantesData={cuadrantesData}
-                        filteredIncidents={filteredIncidents}
-                        modalFilters={modalFilters}
-                        setModalFilters={setModalFilters}
-                        getQuadrantColor={getQuadrantColor}
-                        setModalSelectedIncident={setModalSelectedIncident}
-                        modalSelectedIncident={modalSelectedIncident}
-                        handleEditIncident={handleEditIncident}
-                        setEditingIncidentId={setEditingIncidentId}
-                        setEditForm={setEditForm}
-                        editingIncidentId={editingIncidentId}
-                        editForm={editForm}
-                        handleEditChange={handleEditChange}
-                        handleSaveIncident={handleSaveIncident}
-                        handleCancelEdit={handleCancelEdit}
-                        getStatusBadgeClass={getStatusBadgeClass}
-                        INCIDENT_TYPES={INCIDENT_TYPES}
-                        mapRef={mapRef}
-                    />
+                    {selectedQuadrant && (
+                        <QuadrantDetailsModal
+                            show={showQuadrantDetails}
+                            onHide={() => {
+                                setShowQuadrantDetails(false);
+                                setSelectedQuadrant(null);
+                                setFilteredIncidents([]);
+                            }}
+                            selectedQuadrant={selectedQuadrant}
+                            cuadrantesData={cuadrantesData}
+                            filteredIncidents={filteredIncidents}
+                            modalFilters={modalFilters}
+                            setModalFilters={setModalFilters}
+                            getQuadrantColor={getQuadrantColor}
+                            setModalSelectedIncident={setModalSelectedIncident}
+                            modalSelectedIncident={modalSelectedIncident}
+                            handleEditIncident={handleEditIncident}
+                            setEditingIncidentId={setEditingIncidentId}
+                            setEditForm={setEditForm}
+                            editingIncidentId={editingIncidentId}
+                            editForm={editForm}
+                            handleEditChange={handleEditChange}
+                            handleSaveIncident={handleSaveIncident}
+                            handleCancelEdit={handleCancelEdit}
+                            getStatusBadgeClass={getStatusBadgeClass}
+                            INCIDENT_TYPES={INCIDENT_TYPES}
+                            mapRef={mapRef}
+                        />
+                    )}
                 </Tab.Pane>
 
                 {/* Sección de Asistencia */}

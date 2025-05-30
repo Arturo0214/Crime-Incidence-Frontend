@@ -5,57 +5,111 @@ import * as turf from '@turf/turf';
 
 const MiniIncidentMap = ({ feature, onQuadrantClick }) => {
     const [isHovered, setIsHovered] = useState(false);
+    const [mapError, setMapError] = useState(false);
 
-    // Calcular centroide con turf
-    const centroid = useMemo(() => {
-        if (!feature) return [19.4555, -99.1405];
+    // Calcular centroide y límites con turf
+    const { centroid, bounds } = useMemo(() => {
+        if (!feature) return {
+            centroid: [19.4555, -99.1405],
+            bounds: null
+        };
         try {
             const center = turf.centroid(feature);
-            return [center.geometry.coordinates[1], center.geometry.coordinates[0]];
+            const bbox = turf.bbox(feature);
+            return {
+                centroid: [center.geometry.coordinates[1], center.geometry.coordinates[0]],
+                bounds: [
+                    [bbox[1], bbox[0]], // [south, west]
+                    [bbox[3], bbox[2]]  // [north, east]
+                ]
+            };
         } catch {
-            return [19.4555, -99.1405];
+            return {
+                centroid: [19.4555, -99.1405],
+                bounds: null
+            };
         }
     }, [feature]);
 
     if (!feature) return null;
 
-    const handleMapClick = () => {
+    const handleMapClick = (e) => {
+        e.stopPropagation();
         if (onQuadrantClick && feature.properties.no_cdrn) {
             onQuadrantClick(feature.properties.no_cdrn);
         }
     };
 
+    const handleTileError = () => {
+        setMapError(true);
+    };
+
+    if (mapError) {
+        return (
+            <div
+                onClick={handleMapClick}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                style={{
+                    cursor: 'pointer',
+                    height: '200px',
+                    width: '100%',
+                    borderRadius: '8px',
+                    background: isHovered ? '#4CAF50' : '#81C784',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontWeight: 'bold'
+                }}
+            >
+                Cuadrante {feature.properties.no_cdrn}
+            </div>
+        );
+    }
+
     return (
         <div
-            style={{ width: 180, height: 180, margin: '0 auto', borderRadius: 10, overflow: 'hidden', boxShadow: '0 1px 4px rgba(44,62,80,0.08)' }}
+            onClick={handleMapClick}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            onClick={handleMapClick}
-            className="cursor-pointer"
+            style={{ cursor: 'pointer' }}
         >
             <MapContainer
                 center={centroid}
                 zoom={14}
-                style={{ width: '100%', height: '100%' }}
-                scrollWheelZoom={false}
-                doubleClickZoom={false}
+                style={{ height: '200px', width: '100%', borderRadius: '8px' }}
                 zoomControl={false}
-                attributionControl={false}
                 dragging={false}
-                keyboard={false}
                 touchZoom={false}
+                doubleClickZoom={false}
+                scrollWheelZoom={false}
                 boxZoom={false}
+                keyboard={false}
+                whenReady={(map) => {
+                    if (bounds) {
+                        map.target.fitBounds(bounds, {
+                            padding: [20, 20],
+                            maxZoom: 15,
+                            animate: false
+                        });
+                    }
+                }}
             >
                 <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    eventHandlers={{
+                        error: handleTileError
+                    }}
                 />
                 <GeoJSON
                     data={feature}
                     style={{
                         color: '#2E7D32',
                         weight: 3,
-                        fillColor: isHovered ? '#1B5E20' : '#4CAF50',
-                        fillOpacity: isHovered ? 0.5 : 0.35
+                        fillColor: isHovered ? '#4CAF50' : '#81C784',
+                        fillOpacity: 0.35
                     }}
                 />
             </MapContainer>

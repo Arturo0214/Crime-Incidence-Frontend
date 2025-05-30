@@ -180,6 +180,8 @@ const Agreements = () => {
                                 type="date"
                                 value={dateFilter}
                                 onChange={(e) => setDateFilter(e.target.value)}
+                                className="date-filter-black"
+                                style={{ color: 'black !important' }}
                             />
                         </Form.Group>
                     </Col>
