@@ -22,6 +22,7 @@ export const createCitizenRequest = async (data) => {
             latitude: data.latitude,
             status: data.status || 'Pendiente'
         };
+        console.log('Payload final a enviar al backend:', requestData);
         const response = await axiosInstance.post('/citizen-requests', requestData);
         return response.data;
     } catch (error) {

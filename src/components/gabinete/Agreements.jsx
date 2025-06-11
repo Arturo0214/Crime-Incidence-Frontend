@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Row, Col, Card, Button, Modal, Form } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchAgreements, addComment, editComment, deleteComment } from '../../slices/agreementsSlice';
+import { fetchAgreements, addComment, editComment, deleteComment, editAgreement, removeAgreement } from '../../slices/agreementsSlice';
 import './Agreements.css';
 import { jwtDecode } from 'jwt-decode';
 import { isAdmin } from '../../utils/auth';
+import * as XLSX from 'xlsx';
 
 const Agreements = () => {
     const dispatch = useDispatch();
@@ -18,6 +19,7 @@ const Agreements = () => {
         date: new Date().toISOString().split('T')[0],
         status: 'pendiente'
     });
+    const [agreementError, setAgreementError] = useState('');
     const [editingAgreementId, setEditingAgreementId] = useState(null);
     const [editAgreementForm, setEditAgreementForm] = useState({});
     const [commentText, setCommentText] = useState({});
@@ -25,6 +27,8 @@ const Agreements = () => {
     const [statusFilter, setStatusFilter] = useState('');
     const [editingComment, setEditingComment] = useState({});
     const [editCommentText, setEditCommentText] = useState({});
+    const [showAllAgreements, setShowAllAgreements] = useState(false);
+    const [allStatusFilter, setAllStatusFilter] = useState('');
 
     useEffect(() => {
         if (!hasFetchedRef.current) {
@@ -43,9 +47,28 @@ const Agreements = () => {
 
     const handleAgreementSubmit = async (e) => {
         e.preventDefault();
+        setAgreementError(''); // Limpiamos errores previos
 
         try {
+            // Primero creamos el nuevo acuerdo
+            const response = await fetch('/api/agreements', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(newAgreement)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Error al crear el acuerdo');
+            }
+
+            // Si se creó exitosamente, recargamos los acuerdos
             await dispatch(fetchAgreements()).unwrap();
+
+            // Cerramos el modal y reseteamos el formulario
             setShowAgreementModal(false);
             setNewAgreement({
                 title: '',
@@ -55,37 +78,33 @@ const Agreements = () => {
             });
         } catch (error) {
             console.error('Error al crear el acuerdo:', error);
+            setAgreementError(error.message || 'Error al crear el acuerdo');
         }
     };
 
-    // Utilidad para comparar solo año, mes y día en local time
-    const isSameDay = (dateA, dateB) => {
-        const a = new Date(dateA);
-        const b = new Date(dateB);
-        return (
-            a.getFullYear() === b.getFullYear() &&
-            a.getMonth() === b.getMonth() &&
-            a.getDate() === b.getDate()
-        );
-    };
-
     const today = new Date();
-    // Si no hay filtros, mostrar solo acuerdos del día
-    // Si hay filtros, mostrar los que correspondan al filtro
     const showFiltered = !!dateFilter || !!statusFilter;
     const filtered = showFiltered
         ? agreements.filter(agreement => {
-            const matchesDate = !dateFilter || new Date(agreement.date).toISOString().split('T')[0] === dateFilter;
+            const matchesDate = !dateFilter ||
+                (agreement.date && agreement.date.slice(0, 10) === dateFilter);
             const matchesStatus = !statusFilter || agreement.status === statusFilter;
             return matchesDate && matchesStatus;
         })
-        : agreements.filter(agreement => isSameDay(agreement.date, today));
+        : agreements.filter(agreement => {
+            const agreementDate = new Date(agreement.date);
+            return (
+                agreementDate.getFullYear() === today.getFullYear() &&
+                agreementDate.getMonth() === today.getMonth() &&
+                agreementDate.getDate() === today.getDate()
+            );
+        });
 
-    // Log en cada render para depuración
-    console.log('[RENDER] loadingAgreements:', loadingAgreements);
-    console.log('[RENDER] agreements:', agreements);
-    console.log('[RENDER] filtered:', filtered);
-    console.log('[RENDER] error:', error);
+    // Todos los acuerdos (ordenados y filtrados por estado si aplica)
+    const allAgreementsFiltered = agreements
+        .slice()
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .filter(agreement => !allStatusFilter || agreement.status === allStatusFilter);
 
     if (loadingAgreements) {
         return <div className="text-center p-4">Cargando acuerdos...</div>;
@@ -159,6 +178,53 @@ const Agreements = () => {
         }
     };
 
+    // Handler para guardar edición de acuerdo
+    const handleSaveEditAgreement = async (agreementId) => {
+        try {
+            await dispatch(editAgreement({ id: agreementId, data: editAgreementForm })).unwrap();
+            await dispatch(fetchAgreements()).unwrap();
+            setEditingAgreementId(null);
+        } catch (error) {
+            alert('Error al editar el acuerdo: ' + (error.message || error));
+        }
+    };
+
+    // Handler para eliminar acuerdo
+    const handleDeleteAgreement = async (agreementId) => {
+        if (!window.confirm('¿Estás seguro de que deseas eliminar este acuerdo?')) return;
+        try {
+            await dispatch(removeAgreement(agreementId)).unwrap();
+            await dispatch(fetchAgreements()).unwrap();
+        } catch (error) {
+            alert('Error al eliminar el acuerdo: ' + (error.message || error));
+        }
+    };
+
+    // Función para generar el reporte Excel de todos los acuerdos filtrados
+    const handleExportAllAgreementsExcel = () => {
+        if (allAgreementsFiltered.length === 0) {
+            alert('No hay acuerdos para exportar.');
+            return;
+        }
+        const data = [
+            ['Fecha', 'Título', 'Estado', 'Descripción']
+        ];
+        allAgreementsFiltered.forEach(agreement => {
+            data.push([
+                agreement.date ? new Date(agreement.date).toLocaleDateString('es-MX') : '',
+                agreement.title || '',
+                agreement.status || '',
+                agreement.description || ''
+            ]);
+        });
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Acuerdos');
+        const estado = allStatusFilter ? allStatusFilter : 'todos';
+        const fileName = `Reporte_Acuerdos_${estado}_${new Date().toISOString().split('T')[0]}.xlsx`;
+        XLSX.writeFile(wb, fileName);
+    };
+
     return (
         <div className="agreements-section">
             <div className="agreements-header d-flex justify-content-between align-items-center">
@@ -181,7 +247,7 @@ const Agreements = () => {
                                 value={dateFilter}
                                 onChange={(e) => setDateFilter(e.target.value)}
                                 className="date-filter-black"
-                                style={{ color: 'black !important' }}
+                                style={{ color: 'black' }}
                             />
                         </Form.Group>
                     </Col>
@@ -205,11 +271,19 @@ const Agreements = () => {
             </div>
 
             {/* Modal para nuevo acuerdo */}
-            <Modal show={showAgreementModal} onHide={() => setShowAgreementModal(false)} className="agreement-modal">
-                <Modal.Header closeButton>
-                    <Modal.Title className='text-white'>Nuevo Acuerdo</Modal.Title>
+            <Modal show={showAgreementModal} onHide={() => {
+                setShowAgreementModal(false);
+                setAgreementError('');
+            }} className="agreement-modal">
+                <Modal.Header closeButton className="text-center">
+                    <Modal.Title className='custom-modal-title'>Nuevo Acuerdo</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
+                    {agreementError && (
+                        <div className="alert alert-danger mb-3">
+                            {agreementError}
+                        </div>
+                    )}
                     <Form onSubmit={handleAgreementSubmit}>
                         <Form.Group className="mb-3">
                             <Form.Label>Título</Form.Label>
@@ -237,6 +311,8 @@ const Agreements = () => {
                                 value={newAgreement.date}
                                 onChange={(e) => setNewAgreement({ ...newAgreement, date: e.target.value })}
                                 required
+                                className="date-filter-black"
+                                placeholder="YYYY-MM-DD"
                             />
                         </Form.Group>
                         <Form.Group className="mb-3">
@@ -252,9 +328,11 @@ const Agreements = () => {
                                 <option value="informacion">Información</option>
                             </Form.Select>
                         </Form.Group>
-                        <Button variant="primary" type="submit">
-                            Crear Acuerdo
-                        </Button>
+                        <div className="text-center">
+                            <Button variant="primary" type="submit" className="px-4">
+                                Crear Acuerdo
+                            </Button>
+                        </div>
                     </Form>
                 </Modal.Body>
             </Modal>
@@ -325,10 +403,7 @@ const Agreements = () => {
                                                     rows={3}
                                                 />
                                                 <div className="agreement-actions">
-                                                    <Button size="sm" variant="success" onClick={async () => {
-                                                        await dispatch(fetchAgreements()).unwrap();
-                                                        setEditingAgreementId(null);
-                                                    }}>Guardar</Button>
+                                                    <Button size="sm" variant="success" onClick={() => handleSaveEditAgreement(agreement._id)}>Guardar</Button>
                                                     <Button size="sm" variant="secondary" onClick={() => setEditingAgreementId(null)}>Cancelar</Button>
                                                 </div>
                                             </>
@@ -347,9 +422,7 @@ const Agreements = () => {
                                                                     status: agreement.status
                                                                 });
                                                             }}>Editar</Button>
-                                                            <Button size="sm" variant="outline-danger" onClick={async () => {
-                                                                await dispatch(fetchAgreements()).unwrap();
-                                                            }}>Eliminar</Button>
+                                                            <Button size="sm" variant="outline-danger" onClick={() => handleDeleteAgreement(agreement._id)}>Eliminar</Button>
                                                         </>
                                                     )}
                                                 </div>
@@ -417,7 +490,181 @@ const Agreements = () => {
                         ))
                     )}
                 </Row>
+                {/* Botón para mostrar todos los acuerdos */}
+                {!showAllAgreements && (
+                    <div className="text-center mt-4">
+                        <Button variant="outline-primary" onClick={() => setShowAllAgreements(true)}>
+                            Mostrar todos los acuerdos
+                        </Button>
+                    </div>
+                )}
             </div>
+            {/* Sección de todos los acuerdos */}
+            {showAllAgreements && (
+                <div className="all-agreements-section mt-5">
+                    <div className="d-flex justify-content-between align-items-center mb-3">
+                        <h5 className="mb-0">Todos los acuerdos</h5>
+                        <Button variant="outline-secondary" onClick={() => setShowAllAgreements(false)}>
+                            Ocultar todos los acuerdos
+                        </Button>
+                    </div>
+                    <div className="all-agreements-filters mb-3">
+                        <div style={{ maxWidth: 320 }}>
+                            <Form.Label>Filtrar por estado</Form.Label>
+                            <Form.Select
+                                value={allStatusFilter}
+                                onChange={e => setAllStatusFilter(e.target.value)}
+                            >
+                                <option value="">Todos los estados</option>
+                                <option value="pendiente">Pendiente</option>
+                                <option value="en_progreso">En progreso</option>
+                                <option value="completado">Completado</option>
+                                <option value="cancelado">Cancelado</option>
+                                <option value="informacion">Información</option>
+                            </Form.Select>
+                        </div>
+                        <div>
+                            <Button variant="success" className="report-button" onClick={handleExportAllAgreementsExcel}>
+                                <i className="fas fa-file-excel me-2"></i>
+                                Generar reporte Excel
+                            </Button>
+                        </div>
+                    </div>
+                    <Row>
+                        {allAgreementsFiltered.length === 0 ? (
+                            <Col xs={12}><p>No hay acuerdos para mostrar.</p></Col>
+                        ) : (
+                            allAgreementsFiltered.map(agreement => (
+                                <Col key={agreement._id} xs={12} className="mb-3">
+                                    <Card className="agreement-card">
+                                        <Card.Body>
+                                            <div className="agreement-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                                                <div className="agreement-title">
+                                                    {editingAgreementId === agreement._id ? (
+                                                        <input
+                                                            value={editAgreementForm.title || ''}
+                                                            onChange={e => setEditAgreementForm(f => ({ ...f, title: e.target.value }))}
+                                                            className="form-control"
+                                                        />
+                                                    ) : (
+                                                        agreement.title
+                                                    )}
+                                                </div>
+                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+                                                    <span className="agreement-date-badge" style={{ marginBottom: 4 }}>
+                                                        {new Date(agreement.date).toLocaleDateString('es-MX', {
+                                                            year: 'numeric',
+                                                            month: 'long',
+                                                            day: 'numeric'
+                                                        })}
+                                                    </span>
+                                                    <span className={`agreement-status-badge badge-sm ${agreement.status}`}>
+                                                        {agreement.status === 'completado' ? 'Completado' :
+                                                            agreement.status === 'en_progreso' ? 'En progreso' :
+                                                                agreement.status === 'cancelado' ? 'Cancelado' :
+                                                                    agreement.status === 'informacion' ? 'Información' :
+                                                                        'Pendiente'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            {editingAgreementId === agreement._id ? (
+                                                <>
+                                                    <textarea
+                                                        value={editAgreementForm.description || ''}
+                                                        onChange={e => setEditAgreementForm(f => ({ ...f, description: e.target.value }))}
+                                                        className="form-control mb-3"
+                                                        rows={3}
+                                                    />
+                                                    <div className="agreement-actions">
+                                                        <Button size="sm" variant="success" onClick={() => handleSaveEditAgreement(agreement._id)}>Guardar</Button>
+                                                        <Button size="sm" variant="secondary" onClick={() => setEditingAgreementId(null)}>Cancelar</Button>
+                                                    </div>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <div className="agreement-description">{agreement.description}</div>
+                                                    <div className="agreement-actions">
+                                                        {isAdmin(user) && (
+                                                            <>
+                                                                <Button size="sm" variant="outline-primary" onClick={() => {
+                                                                    setEditingAgreementId(agreement._id);
+                                                                    setEditAgreementForm({
+                                                                        title: agreement.title,
+                                                                        description: agreement.description,
+                                                                        date: agreement.date ? new Date(agreement.date).toISOString().slice(0, 10) : '',
+                                                                        status: agreement.status
+                                                                    });
+                                                                }}>Editar</Button>
+                                                                <Button size="sm" variant="outline-danger" onClick={() => handleDeleteAgreement(agreement._id)}>Eliminar</Button>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </>
+                                            )}
+                                            {/* Comentarios de seguimiento */}
+                                            <div className="agreement-comments">
+                                                <div className="agreement-comments-title">Seguimiento</div>
+                                                <div>
+                                                    {(agreement.comments || []).map((c, idx) => (
+                                                        <div key={idx} className="agreement-comment">
+                                                            <div className="agreement-comment-content">
+                                                                <div className="agreement-comment-author">{c.author || 'Anónimo'}</div>
+                                                                <div className="agreement-comment-text">{c.text}</div>
+                                                                <div className="agreement-comment-date">{c.date ? new Date(c.date).toLocaleString() : ''}</div>
+                                                            </div>
+                                                            <div className="agreement-comment-actions">
+                                                                {editingComment[agreement._id] === idx ? (
+                                                                    <>
+                                                                        <input
+                                                                            type="text"
+                                                                            value={editCommentText[agreement._id] || ''}
+                                                                            onChange={e => setEditCommentText(t => ({ ...t, [agreement._id]: e.target.value }))}
+                                                                            className="form-control"
+                                                                            style={{ flex: 1 }}
+                                                                        />
+                                                                        <Button size="sm" variant="success" onClick={async () => {
+                                                                            await handleEditComment(agreement._id, idx, { ...c, text: editCommentText[agreement._id] });
+                                                                        }}>Guardar</Button>
+                                                                        <Button size="sm" variant="secondary" onClick={() => {
+                                                                            setEditingComment(ec => ({ ...ec, [agreement._id]: undefined }));
+                                                                            setEditCommentText(et => ({ ...et, [agreement._id]: '' }));
+                                                                        }}>Cancelar</Button>
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <Button size="sm" variant="outline-primary" onClick={() => {
+                                                                            setEditingComment(ec => ({ ...ec, [agreement._id]: idx }));
+                                                                            setEditCommentText(et => ({ ...et, [agreement._id]: c.text }));
+                                                                        }}>Editar</Button>
+                                                                        <Button size="sm" variant="outline-danger" onClick={async () => {
+                                                                            await handleDeleteComment(agreement._id, idx);
+                                                                        }}>Eliminar</Button>
+                                                                    </>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                <div className="agreement-comment-input">
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Escribe un comentario..."
+                                                        value={commentText[agreement._id] || ''}
+                                                        onChange={e => setCommentText(t => ({ ...t, [agreement._id]: e.target.value }))}
+                                                    />
+                                                    <Button size="sm" variant="primary" onClick={() => handleAddComment(agreement._id)}>
+                                                        Comentar
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </Card.Body>
+                                    </Card>
+                                </Col>
+                            ))
+                        )}
+                    </Row>
+                </div>
+            )}
         </div>
     );
 };

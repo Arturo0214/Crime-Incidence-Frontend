@@ -380,3 +380,98 @@
     box-shadow: 0 12px 32px rgba(34, 51, 84, 0.22), 0 2px 8px rgba(34, 51, 84, 0.13);
     transform: perspective(800px) rotateX(0deg) scale(1.01);
 }
+
+/* Estilos para el botón de edición de asistencia */
+.attendance-board td:hover .edit-attendance-btn {
+    opacity: 1 !important;
+}
+
+.edit-attendance-btn {
+    background-color: #fff !important;
+    border-color: #2563eb !important;
+    color: #2563eb !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.edit-attendance-btn:hover {
+    background-color: #2563eb !important;
+    color: #fff !important;
+    transform: translateY(-50%) scale(1.05) !important;
+}
+
+.edit-attendance-btn:active {
+    transform: translateY(-50%) scale(0.95) !important;
+}
+
+/* Ajuste para el contenedor de la celda */
+.attendance-board td {
+    position: relative;
+    padding-right: 30px !important;
+}
+
+/* Estilos para el botón de reporte */
+.report-button {
+    transition: all 0.3s ease;
+    background-color: #198754 !important;
+    border-color: #198754 !important;
+}
+
+.report-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+    background-color: #157347 !important;
+    border-color: #157347 !important;
+}
+
+.report-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.report-button:disabled {
+    background-color: #75b798 !important;
+    border-color: #75b798 !important;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none !important;
+}
+
+/* Estilos para el bloque de filtros de reporte */
+.report-filters-wrapper {
+    background: #f8fafc;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.06);
+    padding: 24px 18px 18px 18px;
+    margin-top: 32px;
+    margin-bottom: 24px;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.report-filters-wrapper label {
+    color: #2563eb;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.report-filters-wrapper .form-control.date-filter-black {
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1.5px solid #2563eb;
+    color: #222;
+    background: #fff;
+    box-shadow: none;
+    transition: border-color 0.2s;
+}
+
+.report-filters-wrapper .form-control.date-filter-black:focus {
+    border-color: #1d4ed8;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.08);
+}
+
+@media (max-width: 767px) {
+    .report-filters-wrapper {
+        padding: 16px 6px 12px 6px;
+    }
+}

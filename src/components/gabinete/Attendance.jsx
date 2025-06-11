@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Row, Col, Table, Button, Modal, Form } from 'react-bootstrap';
 import './Attendance.css';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchAttendance, addAttendance } from '../../slices/attendanceSlice';
+import { fetchAttendance, addAttendance, editAttendance } from '../../slices/attendanceSlice';
 import { isAdmin } from '../../utils/auth';
+import * as XLSX from 'xlsx';
 
 const participants = [
     { id: 1, name: 'Fiscalía General de Justicia', role: 'Dependencia' },
@@ -21,6 +22,7 @@ const Attendance = () => {
     const dispatch = useDispatch();
     const { user } = useSelector(state => state.user);
     const [showAttendanceModal, setShowAttendanceModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
     const [attendanceData, setAttendanceData] = useState({});
     const [attendanceSuccess, setAttendanceSuccess] = useState(null);
@@ -37,6 +39,10 @@ const Attendance = () => {
     const [firstLoad, setFirstLoad] = useState(true);
     const [submitLoading, setSubmitLoading] = useState(false);
     const [submitError, setSubmitError] = useState(null);
+    const [editingAttendance, setEditingAttendance] = useState(null);
+    const [reportLoading, setReportLoading] = useState(false);
+    const [reportStartDate, setReportStartDate] = useState('');
+    const [reportEndDate, setReportEndDate] = useState('');
 
     // Utilidades
     function getWeekNumber(d) {
@@ -126,6 +132,19 @@ const Attendance = () => {
         });
     });
 
+    // Utilidad para filtrar asistencias por rango
+    const filterAttendanceByRange = (start, end) => {
+        if (!start || !end) return [];
+        const startDate = new Date(start);
+        startDate.setHours(0, 0, 0, 0);
+        const endDate = new Date(end);
+        endDate.setHours(23, 59, 59, 999);
+        return attendance.filter(a => {
+            const d = new Date(a.date);
+            return d >= startDate && d <= endDate;
+        });
+    };
+
     const handleAttendanceSubmit = async (e) => {
         e.preventDefault();
         setSubmitLoading(true);
@@ -157,6 +176,143 @@ const Attendance = () => {
             ...prev,
             [participantId]: value
         }));
+    };
+
+    const handleEditAttendance = (date, record) => {
+        const formattedDate = new Date(date).toISOString().split('T')[0];
+        setSelectedDate(formattedDate);
+        setEditingAttendance(record);
+
+        // Initialize attendance data with existing values
+        const initialData = {};
+        record.participants.forEach(p => {
+            const id = p.participantId._id || p.participantId;
+            initialData[id] = p.attendance;
+        });
+        setAttendanceData(initialData);
+        setShowEditModal(true);
+    };
+
+    const handleEditSubmit = async (e) => {
+        e.preventDefault();
+        setSubmitLoading(true);
+        setSubmitError(null);
+        setAttendanceSuccess(null);
+        try {
+            const updatedAttendance = {
+                date: selectedDate,
+                participants: participants.map(participant => ({
+                    participantId: participant.id,
+                    attendance: attendanceData[participant.id] || 'ausente'
+                }))
+            };
+            await dispatch(editAttendance({ id: editingAttendance._id, data: updatedAttendance })).unwrap();
+            setAttendanceSuccess('¡Asistencia actualizada correctamente!');
+            setTimeout(() => {
+                setShowEditModal(false);
+                setAttendanceSuccess(null);
+                setEditingAttendance(null);
+            }, 1200);
+        } catch (err) {
+            setSubmitError('Error al actualizar asistencia: ' + (err?.response?.data?.error || err.message));
+        } finally {
+            setSubmitLoading(false);
+        }
+    };
+
+    const generateExcelReport = () => {
+        if (!reportStartDate || !reportEndDate) {
+            alert('Por favor selecciona un rango de fechas.');
+            return;
+        }
+        setReportLoading(true);
+        try {
+            // Filtrar asistencias por rango
+            const filteredAttendance = filterAttendanceByRange(reportStartDate, reportEndDate);
+            // Resumir igual que la tabla visual
+            const summary = {};
+            participants.forEach(part => {
+                summary[part.id] = {
+                    name: part.name,
+                    week: { titular: 0, suplente: 0, ausente: 0 },
+                    month: { titular: 0, suplente: 0, ausente: 0 }
+                };
+            });
+            // Calcular semana y mes del rango
+            const weekStart = new Date(reportStartDate);
+            weekStart.setHours(0, 0, 0, 0);
+            const weekEnd = new Date(reportEndDate);
+            weekEnd.setHours(23, 59, 59, 999);
+            // Semana
+            filteredAttendance.forEach(a => {
+                const attendanceLocalDate = getLocalDateOnly(a.date);
+                if (attendanceLocalDate >= weekStart && attendanceLocalDate <= weekEnd) {
+                    a.participants.forEach(p => {
+                        const id = String(p.participantId._id || p.participantId);
+                        if (summary[id]) {
+                            summary[id].week[p.attendance]++;
+                        }
+                    });
+                }
+            });
+            // Mes
+            filteredAttendance.forEach(a => {
+                const d = new Date(a.date);
+                if (
+                    d.getFullYear() === weekStart.getFullYear() &&
+                    d.getMonth() === weekStart.getMonth()
+                ) {
+                    a.participants.forEach(p => {
+                        const id = String(p.participantId._id || p.participantId);
+                        if (summary[id]) {
+                            summary[id].month[p.attendance]++;
+                        }
+                    });
+                }
+            });
+            // Preparar datos para Excel
+            const reportData = [];
+            reportData.push([
+                'Dependencia',
+                'Semana Titular', 'Semana Suplente', 'Semana Ausente',
+                'Mes Titular', 'Mes Suplente', 'Mes Ausente',
+                'Asistencia Total'
+            ]);
+            participants.forEach(part => {
+                const s = summary[part.id];
+                const totalMonth = s.month.titular + s.month.suplente + s.month.ausente;
+                const asistenciasTitular = s.month.titular;
+                const asistenciasSuplente = s.month.suplente;
+                const ausencias = s.month.ausente;
+                const totalAsistencias = asistenciasTitular + asistenciasSuplente;
+                let resumenText = '';
+                if (totalMonth > 0) {
+                    resumenText = `${totalAsistencias}/${totalMonth} asistencias`;
+                    if (asistenciasTitular > 0) resumenText += ` Titular: ${asistenciasTitular}`;
+                    if (asistenciasSuplente > 0) resumenText += ` Suplente: ${asistenciasSuplente}`;
+                    if (ausencias > 0) resumenText += ` Ausencias: ${ausencias}`;
+                } else {
+                    resumenText = 'Sin registros';
+                }
+                reportData.push([
+                    s.name,
+                    s.week.titular, s.week.suplente, s.week.ausente,
+                    s.month.titular, s.month.suplente, s.month.ausente,
+                    resumenText
+                ]);
+            });
+            // Crear libro de Excel
+            const ws = XLSX.utils.aoa_to_sheet(reportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Reporte de Asistencia');
+            // Generar nombre del archivo con fechas del rango
+            const fileName = `Reporte_Asistencia_${reportStartDate}_a_${reportEndDate}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        } catch (error) {
+            console.error('Error al generar el reporte:', error);
+        } finally {
+            setReportLoading(false);
+        }
     };
 
     if (loading) return <div>Loading...</div>;
@@ -315,11 +471,29 @@ const Attendance = () => {
                                                     }
                                                 }
                                                 return (
-                                                    <td key={date.toISOString().slice(0, 10)} className="text-center">
+                                                    <td key={date.toISOString().slice(0, 10)} className="text-center position-relative">
                                                         {status && (
-                                                            <span className={`attendance-status ${status}`}>
-                                                                {status.charAt(0).toUpperCase() + status.slice(1)}
-                                                            </span>
+                                                            <>
+                                                                <span className={`attendance-status ${status}`}>
+                                                                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                                                                </span>
+                                                                <button
+                                                                    className="btn btn-sm btn-outline-primary edit-attendance-btn"
+                                                                    onClick={() => handleEditAttendance(date, record)}
+                                                                    style={{
+                                                                        position: 'absolute',
+                                                                        top: '50%',
+                                                                        right: '5px',
+                                                                        transform: 'translateY(-50%)',
+                                                                        padding: '2px 6px',
+                                                                        fontSize: '0.75rem',
+                                                                        opacity: 0,
+                                                                        transition: 'opacity 0.2s'
+                                                                    }}
+                                                                >
+                                                                    <i className="fas fa-edit"></i>
+                                                                </button>
+                                                            </>
                                                         )}
                                                     </td>
                                                 );
@@ -332,6 +506,62 @@ const Attendance = () => {
                     );
                 })()
             )}
+            {/* Inputs de rango de fechas para el reporte */}
+            <div className="report-filters-wrapper mb-3">
+                <Row className="g-3 align-items-end justify-content-center">
+                    <Col xs={12} md={4}>
+                        <label className="fw-bold mb-1" htmlFor="reportStartDate">Fecha inicio:</label>
+                        <input
+                            id="reportStartDate"
+                            type="date"
+                            className="form-control date-filter-black"
+                            value={reportStartDate}
+                            onChange={e => setReportStartDate(e.target.value)}
+                            max={reportEndDate || new Date().toISOString().split('T')[0]}
+                        />
+                    </Col>
+                    <Col xs={12} md={4}>
+                        <label className="fw-bold mb-1" htmlFor="reportEndDate">Fecha fin:</label>
+                        <input
+                            id="reportEndDate"
+                            type="date"
+                            className="form-control date-filter-black"
+                            value={reportEndDate}
+                            onChange={e => setReportEndDate(e.target.value)}
+                            min={reportStartDate}
+                            max={new Date().toISOString().split('T')[0]}
+                        />
+                    </Col>
+                    <Col xs={12} md={4} className="d-flex justify-content-center justify-content-md-end mt-2 mt-md-0">
+                        <Button
+                            variant="success"
+                            onClick={generateExcelReport}
+                            disabled={reportLoading || !reportStartDate || !reportEndDate}
+                            className="report-button"
+                            style={{
+                                minWidth: '200px',
+                                padding: '10px 20px',
+                                fontSize: '1rem',
+                                fontWeight: 600,
+                                borderRadius: '8px',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                            }}
+                        >
+                            {reportLoading ? (
+                                <>
+                                    <i className="fas fa-spinner fa-spin me-2"></i>
+                                    Generando Reporte...
+                                </>
+                            ) : (
+                                <>
+                                    <i className="fas fa-file-excel me-2"></i>
+                                    Generar Reporte Excel
+                                </>
+                            )}
+                        </Button>
+                    </Col>
+                </Row>
+            </div>
             {/* Modal de Asistencia */}
             <Modal show={showAttendanceModal} onHide={() => setShowAttendanceModal(false)} size="md" centered>
                 <div className="attendance-modal-header" style={{ position: 'relative' }}>
@@ -367,7 +597,7 @@ const Attendance = () => {
                                     onChange={(e) => setSelectedDate(e.target.value)}
                                     max={new Date().toISOString().split('T')[0]}
                                     required
-                                    style={{ maxWidth: 180, borderRadius: 6, border: '1px solid #b6c3d1' }}
+                                    className="date-filter-black"
                                 />
                             </Form.Group>
                             <Table className="attendance-modal-table" bordered size="sm">
@@ -434,6 +664,114 @@ const Attendance = () => {
                                 </Button>
                                 <Button variant="primary" type="submit" disabled={submitLoading} style={{ borderRadius: 6, minWidth: 140, fontWeight: 600 }}>
                                     {submitLoading ? 'Guardando...' : 'Guardar Asistencia'}
+                                </Button>
+                            </div>
+                        </Form>
+                    </div>
+                </Modal.Body>
+            </Modal>
+            {/* Modal de Edición de Asistencia */}
+            <Modal show={showEditModal} onHide={() => setShowEditModal(false)} size="md" centered>
+                <div className="attendance-modal-header" style={{ position: 'relative' }}>
+                    Editar Asistencia
+                    <button
+                        type="button"
+                        aria-label="Cerrar"
+                        onClick={() => setShowEditModal(false)}
+                        style={{
+                            position: 'absolute',
+                            top: 10,
+                            right: 16,
+                            background: 'transparent',
+                            border: 'none',
+                            fontSize: 22,
+                            color: '#fff',
+                            cursor: 'pointer',
+                            fontWeight: 700,
+                            lineHeight: 1
+                        }}
+                    >
+                        ×
+                    </button>
+                </div>
+                <Modal.Body style={{ padding: 0, background: '#f8fafc', borderRadius: 0 }}>
+                    <div className="attendance-modal-card">
+                        <Form onSubmit={handleEditSubmit}>
+                            <Form.Group className="mb-3">
+                                <Form.Label style={{ fontWeight: 600, color: '#2563eb' }}>Fecha</Form.Label>
+                                <Form.Control
+                                    type="date"
+                                    value={selectedDate}
+                                    onChange={(e) => setSelectedDate(e.target.value)}
+                                    max={new Date().toISOString().split('T')[0]}
+                                    required
+                                    className="date-filter-black"
+                                />
+                            </Form.Group>
+                            <Table className="attendance-modal-table" bordered size="sm">
+                                <thead>
+                                    <tr>
+                                        <th>Dependencia</th>
+                                        <th className="text-center">Titular</th>
+                                        <th className="text-center">Suplente</th>
+                                        <th className="text-center">Ausente</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {participants.map((participant) => (
+                                        <tr key={participant.id}>
+                                            <td>{participant.name}</td>
+                                            <td>
+                                                <div className="attendance-radio-group">
+                                                    <Form.Check
+                                                        className="attendance-radio"
+                                                        type="radio"
+                                                        id={`edit-titular-${participant.id}`}
+                                                        name={`edit-attendance-${participant.id}`}
+                                                        value="titular"
+                                                        onChange={() => handleAttendanceChange(participant.id, 'titular')}
+                                                        checked={attendanceData[participant.id] === 'titular'}
+                                                    />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div className="attendance-radio-group">
+                                                    <Form.Check
+                                                        className="attendance-radio"
+                                                        type="radio"
+                                                        id={`edit-suplente-${participant.id}`}
+                                                        name={`edit-attendance-${participant.id}`}
+                                                        value="suplente"
+                                                        onChange={() => handleAttendanceChange(participant.id, 'suplente')}
+                                                        checked={attendanceData[participant.id] === 'suplente'}
+                                                    />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div className="attendance-radio-group">
+                                                    <Form.Check
+                                                        className="attendance-radio"
+                                                        type="radio"
+                                                        id={`edit-ausente-${participant.id}`}
+                                                        name={`edit-attendance-${participant.id}`}
+                                                        value="ausente"
+                                                        onChange={() => handleAttendanceChange(participant.id, 'ausente')}
+                                                        checked={attendanceData[participant.id] === 'ausente' || !attendanceData[participant.id]}
+                                                    />
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </Table>
+                            {submitError && <div className="text-danger mt-2">{submitError}</div>}
+                            {attendanceSuccess && <div className="text-success mt-2">{attendanceSuccess}</div>}
+                            <div className="attendance-modal-btns">
+                                <Button variant="secondary" onClick={() => setShowEditModal(false)} disabled={submitLoading} style={{ borderRadius: 6, minWidth: 100 }}>
+                                    Cancelar
+                                </Button>
+                                <Button variant="primary" type="submit" disabled={submitLoading} style={{ borderRadius: 6, minWidth: 140, fontWeight: 600 }}>
+                                    {submitLoading ? 'Guardando...' : 'Guardar Cambios'}
                                 </Button>
                             </div>
                         </Form>

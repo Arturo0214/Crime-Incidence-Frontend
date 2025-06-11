@@ -413,6 +413,23 @@
         gap: 8px;
         margin-top: 2px;
     }
+
+    .agreement-comment-input {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+    }
+
+    .agreement-comment-input input[type="text"] {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .agreement-comment-input button {
+        width: 100%;
+        display: block;
+        margin: 0;
+    }
 }
 
 .date-filter-black {
@@ -441,4 +458,185 @@
 .date-filter-black::-webkit-datetime-edit-day-field,
 .date-filter-black::-webkit-datetime-edit-year-field {
     color: black !important;
+}
+
+/* Forzar color negro en el input de fecha, placeholder y caret */
+.custom-date-input {
+    color: #111 !important;
+    background: #fff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    font-weight: 600;
+}
+
+.custom-date-input:focus {
+    color: #111 !important;
+    background: #fff !important;
+}
+
+.custom-date-input::placeholder {
+    color: #111 !important;
+    opacity: 1 !important;
+}
+
+.custom-date-input::-webkit-input-placeholder {
+    color: #111 !important;
+}
+
+.custom-date-input::-moz-placeholder {
+    color: #111 !important;
+}
+
+.custom-date-input:-ms-input-placeholder {
+    color: #111 !important;
+}
+
+.custom-date-input::-ms-input-placeholder {
+    color: #111 !important;
+}
+
+.custom-date-input::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(0.2) !important;
+}
+
+.custom-date-input::-ms-input-placeholder {
+    color: #111 !important;
+}
+
+.custom-date-input:-webkit-autofill {
+    -webkit-text-fill-color: #111 !important;
+    box-shadow: 0 0 0 1000px #fff inset !important;
+}
+
+/* Título estético para el modal */
+.modal-title.custom-modal-title {
+    color: #fff !important;
+    font-size: 2rem !important;
+    font-weight: 800 !important;
+    text-align: center !important;
+    width: 100%;
+    letter-spacing: -1px;
+    margin: 0 auto 0.5rem auto;
+    background: none;
+    font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
+}
+
+@media (max-width: 600px) {
+    .modal-title.custom-modal-title {
+        font-size: 1.3rem !important;
+        padding: 0.5rem 0;
+    }
+
+    .custom-date-input {
+        font-size: 1rem !important;
+        padding: 0.4rem 0.7rem !important;
+    }
+}
+
+.input-dark {
+    background: #34495e !important;
+    color: #fff !important;
+    border: 1.5px solid #22313a !important;
+    font-weight: 500;
+    width: 100% !important;
+    min-height: 48px;
+    border-radius: 12px;
+    padding: 0.5rem 1rem;
+    font-size: 1.1rem;
+    box-sizing: border-box;
+}
+
+.input-dark:focus {
+    background: #22313a !important;
+    color: #fff !important;
+}
+
+/* Forzar color negro en el input de fecha del modal */
+input[type="date"] {
+    color: #111 !important;
+    background: #fff !important;
+}
+
+input[type="date"]:focus,
+input[type="date"]:hover,
+input[type="date"]:active,
+input[type="date"]:disabled {
+    color: #111 !important;
+    background: #fff !important;
+}
+
+input[type="date"]::placeholder {
+    color: #111 !important;
+    opacity: 1 !important;
+}
+
+input[type="date"]::-webkit-input-placeholder {
+    color: #111 !important;
+}
+
+input[type="date"]::-moz-placeholder {
+    color: #111 !important;
+}
+
+input[type="date"]:-ms-input-placeholder {
+    color: #111 !important;
+}
+
+input[type="date"]::-ms-input-placeholder {
+    color: #111 !important;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(0.2) !important;
+}
+
+input[type="date"]::-ms-input-placeholder {
+    color: #111 !important;
+}
+
+input[type="date"]:-webkit-autofill {
+    -webkit-text-fill-color: #111 !important;
+    box-shadow: 0 0 0 1000px #fff inset !important;
+}
+
+@media (max-width: 767px) {
+    .all-agreements-section .all-agreements-filters {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+    }
+
+    .all-agreements-section .all-agreements-filters .form-select {
+        min-width: 100%;
+    }
+
+    .report-button {
+        width: 100%;
+        min-width: 0;
+        margin-top: 0;
+        font-size: 1.05rem;
+        display: block;
+    }
+}
+
+/* Desktop: filtro de estado y botón de reporte Excel en la misma fila, botón a la derecha */
+.all-agreements-section .all-agreements-filters {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.all-agreements-section .all-agreements-filters>div:first-child {
+    flex: 1 1 320px;
+    min-width: 220px;
+}
+
+.all-agreements-section .all-agreements-filters>div:last-child {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
 }

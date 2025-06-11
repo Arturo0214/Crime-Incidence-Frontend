@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { getCitizenRequests, createCitizenRequest, updateCitizenRequestStatus, addCitizenRequestComment, deleteCitizenRequest, editCitizenRequestComment, deleteCitizenRequestComment } from '../../services/citizenrequests';
+import { getCitizenRequests, createCitizenRequest, updateCitizenRequest, updateCitizenRequestStatus, addCitizenRequestComment, deleteCitizenRequest, editCitizenRequestComment, deleteCitizenRequestComment } from '../../services/citizenrequests';
 import Modal from 'react-modal';
 import { useSelector } from 'react-redux';
 import { jwtDecode } from 'jwt-decode';
 import './CitizenRequests.css';
+import * as XLSX from 'xlsx';
 
 // Setear el elemento raíz para accesibilidad del modal
 Modal.setAppElement('#root');
@@ -30,6 +31,8 @@ const CitizenRequests = () => {
     const [modalOpen, setModalOpen] = useState(false);
     const [editingComment, setEditingComment] = useState({});
     const [editCommentText, setEditCommentText] = useState({});
+    const [fieldErrors, setFieldErrors] = useState({});
+    const [editingRequest, setEditingRequest] = useState(null);
 
     const user = useSelector(state => state.user.user);
 
@@ -67,6 +70,22 @@ const CitizenRequests = () => {
         setModalOpen(true);
     };
 
+    const openEditModal = (req) => {
+        setFormError('');
+        setFieldErrors({});
+        setEditingRequest(req);
+        setNewRequest({
+            title: req.title || '',
+            description: req.description || '',
+            requesterName: req.requester?.name || req.requesterName || '',
+            requesterPhone: req.requester?.phone || req.requesterPhone || '',
+            street: req.location?.street || req.street || '',
+            latitude: req.location?.coordinates?.coordinates?.[1]?.toString() || req.latitude || '',
+            longitude: req.location?.coordinates?.coordinates?.[0]?.toString() || req.longitude || '',
+        });
+        setModalOpen(true);
+    };
+
     const closeModal = () => {
         setModalOpen(false);
         setNewRequest({
@@ -78,19 +97,42 @@ const CitizenRequests = () => {
             longitude: '',
             latitude: ''
         });
+        setEditingRequest(null);
     };
 
     const handleCreate = async (e) => {
         e.preventDefault();
         setFormError('');
+        setFieldErrors({});
         setCreating(true);
-        if (!newRequest.title || !newRequest.description || !newRequest.requesterName || !newRequest.requesterPhone || !newRequest.street || !newRequest.longitude || !newRequest.latitude) {
-            setFormError('Todos los campos son obligatorios.');
+        const errors = {};
+        if (!newRequest.title) errors.title = 'El título es obligatorio.';
+        if (!newRequest.description) errors.description = 'La descripción es obligatoria.';
+        if (!newRequest.requesterName) errors.requesterName = 'El nombre es obligatorio.';
+        if (!newRequest.requesterPhone) errors.requesterPhone = 'El teléfono es obligatorio.';
+        if (!newRequest.street) errors.street = 'La calle es obligatoria.';
+        if (newRequest.longitude === '' || isNaN(parseFloat(newRequest.longitude))) {
+            errors.longitude = 'La longitud es obligatoria y debe ser un número.';
+        } else if (parseFloat(newRequest.longitude) < -180 || parseFloat(newRequest.longitude) > 180) {
+            errors.longitude = 'La longitud debe estar entre -180 y 180.';
+        }
+        if (newRequest.latitude === '' || isNaN(parseFloat(newRequest.latitude))) {
+            errors.latitude = 'La latitud es obligatoria y debe ser un número.';
+        } else if (parseFloat(newRequest.latitude) < -90 || parseFloat(newRequest.latitude) > 90) {
+            errors.latitude = 'La latitud debe estar entre -90 y 90.';
+        }
+        if (Object.keys(errors).length > 0) {
+            setFieldErrors(errors);
+            setFormError('Por favor corrige los errores.');
             setCreating(false);
             return;
         }
         try {
-            await createCitizenRequest(newRequest);
+            if (editingRequest) {
+                await updateCitizenRequest(editingRequest._id, newRequest);
+            } else {
+                await createCitizenRequest(newRequest);
+            }
             setNewRequest({
                 title: '',
                 description: '',
@@ -102,9 +144,10 @@ const CitizenRequests = () => {
             });
             fetchRequests();
             closeModal();
+            setEditingRequest(null);
         } catch (err) {
-            setFormError('Error al crear petición.');
-            setError('Error al crear petición');
+            setFormError('Error al guardar la petición.');
+            setError('Error al guardar la petición');
         }
         setCreating(false);
     };
@@ -172,16 +215,61 @@ const CitizenRequests = () => {
         }
     };
 
+    // Función para exportar todas las peticiones ciudadanas a Excel (sin comentarios)
+    const handleExportExcel = () => {
+        if (!requests.length) {
+            alert('No hay peticiones para exportar.');
+            return;
+        }
+        const data = [
+            [
+                'Título',
+                'Descripción',
+                'Solicitante',
+                'Teléfono',
+                'Calle',
+                'Longitud',
+                'Latitud',
+                'Estado',
+                'Fecha de creación',
+                'ID'
+            ]
+        ];
+        requests.forEach(req => {
+            data.push([
+                req.title || '',
+                req.description || '',
+                req.requester?.name || req.requesterName || '',
+                req.requester?.phone || req.requesterPhone || '',
+                req.location?.street || req.street || '',
+                req.location?.longitude || req.longitude || '',
+                req.location?.latitude || req.latitude || '',
+                req.status || '',
+                req.createdAt ? new Date(req.createdAt).toLocaleString() : '',
+                req._id || ''
+            ]);
+        });
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Peticiones Ciudadanas');
+        const fileName = `Reporte_Peticiones_Ciudadanas_${new Date().toISOString().split('T')[0]}.xlsx`;
+        XLSX.writeFile(wb, fileName);
+    };
+
     return (
         <div className="citizen-requests-section" style={{ background: '#f8fafc', borderRadius: 10, padding: 24, marginBottom: 32 }}>
             <h4 style={{ fontWeight: 700, color: '#2563eb', marginBottom: 18 }}>Peticiones Ciudadanas</h4>
-            <button onClick={openModal} style={{ background: '#2563eb', color: '#fff', border: 'none', borderRadius: 5, padding: '8px 18px', fontWeight: 600, marginBottom: 18 }}>
+            <button onClick={openModal} className="cr-main-btn">
                 + Agregar Petición
+            </button>
+            <button onClick={handleExportExcel} className="cr-main-btn excel">
+                <i className="fas fa-file-excel" style={{ marginRight: 6 }}></i>
+                Exportar a Excel
             </button>
             <Modal
                 isOpen={modalOpen}
                 onRequestClose={closeModal}
-                contentLabel="Agregar Petición Ciudadana"
+                contentLabel={editingRequest ? "Editar Petición Ciudadana" : "Agregar Petición Ciudadana"}
                 style={{
                     overlay: { backgroundColor: 'rgba(20, 23, 31, 0.75)' },
                     content: {
@@ -232,7 +320,7 @@ const CitizenRequests = () => {
                         minHeight: 0
                     }}>
                         <h3 style={{ color: '#fff', fontWeight: 800, fontSize: 22, letterSpacing: 0.5, margin: 0, textAlign: 'center', width: '100%' }}>
-                            Nueva Petición Ciudadana
+                            {editingRequest ? 'Editar Petición Ciudadana' : 'Nueva Petición Ciudadana'}
                         </h3>
                     </div>
                     <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: 18, padding: '24px 28px 0 28px' }}>
@@ -244,6 +332,7 @@ const CitizenRequests = () => {
                             required
                             style={{ padding: 14, borderRadius: 8, border: '1.5px solid #cbd5e1', fontSize: 16, marginBottom: 2, background: '#f8fafc' }}
                         />
+                        {fieldErrors.title && <div style={{ color: '#dc3545', fontSize: 13, marginBottom: 2 }}>{fieldErrors.title}</div>}
                         <input
                             type="text"
                             placeholder="Descripción"
@@ -252,6 +341,7 @@ const CitizenRequests = () => {
                             required
                             style={{ padding: 14, borderRadius: 8, border: '1.5px solid #cbd5e1', fontSize: 16, marginBottom: 2, background: '#f8fafc' }}
                         />
+                        {fieldErrors.description && <div style={{ color: '#dc3545', fontSize: 13, marginBottom: 2 }}>{fieldErrors.description}</div>}
                         <input
                             type="text"
                             placeholder="Nombre del solicitante"
@@ -260,6 +350,7 @@ const CitizenRequests = () => {
                             required
                             style={{ padding: 14, borderRadius: 8, border: '1.5px solid #cbd5e1', fontSize: 16, marginBottom: 2, background: '#f8fafc' }}
                         />
+                        {fieldErrors.requesterName && <div style={{ color: '#dc3545', fontSize: 13, marginBottom: 2 }}>{fieldErrors.requesterName}</div>}
                         <input
                             type="tel"
                             placeholder="Teléfono de contacto"
@@ -268,6 +359,7 @@ const CitizenRequests = () => {
                             required
                             style={{ padding: 14, borderRadius: 8, border: '1.5px solid #cbd5e1', fontSize: 16, marginBottom: 2, background: '#f8fafc' }}
                         />
+                        {fieldErrors.requesterPhone && <div style={{ color: '#dc3545', fontSize: 13, marginBottom: 2 }}>{fieldErrors.requesterPhone}</div>}
                         <input
                             type="text"
                             placeholder="Calle"
@@ -276,25 +368,32 @@ const CitizenRequests = () => {
                             required
                             style={{ padding: 14, borderRadius: 8, border: '1.5px solid #cbd5e1', fontSize: 16, marginBottom: 2, background: '#f8fafc' }}
                         />
+                        {fieldErrors.street && <div style={{ color: '#dc3545', fontSize: 13, marginBottom: 2 }}>{fieldErrors.street}</div>}
                         <div style={{ display: 'flex', gap: 10 }}>
-                            <input
-                                type="number"
-                                placeholder="Longitud"
-                                value={newRequest.longitude}
-                                onChange={e => setNewRequest(n => ({ ...n, longitude: e.target.value }))}
-                                required
-                                step="any"
-                                style={{ flex: 1, padding: 14, borderRadius: 8, border: '1.5px solid #cbd5e1', fontSize: 16, marginBottom: 2, background: '#f8fafc' }}
-                            />
-                            <input
-                                type="number"
-                                placeholder="Latitud"
-                                value={newRequest.latitude}
-                                onChange={e => setNewRequest(n => ({ ...n, latitude: e.target.value }))}
-                                required
-                                step="any"
-                                style={{ flex: 1, padding: 14, borderRadius: 8, border: '1.5px solid #cbd5e1', fontSize: 16, marginBottom: 2, background: '#f8fafc' }}
-                            />
+                            <div style={{ flex: 1 }}>
+                                <input
+                                    type="number"
+                                    placeholder="Latitud"
+                                    value={newRequest.latitude}
+                                    onChange={e => setNewRequest(n => ({ ...n, latitude: e.target.value }))}
+                                    required
+                                    step="any"
+                                    style={{ padding: 14, borderRadius: 8, border: '1.5px solid #cbd5e1', fontSize: 16, marginBottom: 2, background: '#f8fafc' }}
+                                />
+                                {fieldErrors.latitude && <div style={{ color: '#dc3545', fontSize: 13, marginBottom: 2 }}>{fieldErrors.latitude}</div>}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                                <input
+                                    type="number"
+                                    placeholder="Longitud"
+                                    value={newRequest.longitude}
+                                    onChange={e => setNewRequest(n => ({ ...n, longitude: e.target.value }))}
+                                    required
+                                    step="any"
+                                    style={{ padding: 14, borderRadius: 8, border: '1.5px solid #cbd5e1', fontSize: 16, marginBottom: 2, background: '#f8fafc' }}
+                                />
+                                {fieldErrors.longitude && <div style={{ color: '#dc3545', fontSize: 13, marginBottom: 2 }}>{fieldErrors.longitude}</div>}
+                            </div>
                         </div>
                         {formError && <div style={{ color: '#dc3545', marginTop: 2, fontWeight: 600, textAlign: 'center' }}>{formError}</div>}
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 8 }}>
@@ -302,7 +401,7 @@ const CitizenRequests = () => {
                                 Cancelar
                             </button>
                             <button type="submit" disabled={creating} style={{ background: '#22c55e', color: '#fff', border: 'none', borderRadius: 7, padding: '10px 22px', fontWeight: 700, fontSize: 15, boxShadow: '0 1px 4px #0001', cursor: 'pointer', transition: 'background 0.2s' }}>
-                                {creating ? 'Creando...' : 'Guardar'}
+                                {creating ? (editingRequest ? 'Guardando...' : 'Creando...') : (editingRequest ? 'Guardar Cambios' : 'Guardar')}
                             </button>
                         </div>
                     </form>
@@ -336,6 +435,7 @@ const CitizenRequests = () => {
                                     </select>
                                     <div className="cr-header-actions">
                                         <button onClick={() => handleDelete(req._id)} className="cr-header-delete-btn">Eliminar</button>
+                                        <button onClick={() => openEditModal(req)} className="cr-header-edit-btn">Editar</button>
                                     </div>
                                 </div>
                             </div>

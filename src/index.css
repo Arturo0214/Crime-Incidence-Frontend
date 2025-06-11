@@ -119,3 +119,23 @@ code {
   margin-bottom: 30px;
   text-align: center;
 }
+
+/* Estilos personalizados para el spinner */
+.spinner-container {
+  position: relative !important;
+  min-height: 200px !important;
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.spinner-container .spinner-border {
+  color: #2563eb !important;
+}
+
+@media (max-width: 768px) {
+  .spinner-container {
+    min-height: 150px !important;
+  }
+}

@@ -297,3 +297,56 @@
         margin: 0;
     }
 }
+
+.cr-header-edit-btn {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 6px 18px;
+    font-weight: 600;
+    width: 140px;
+    max-width: 100%;
+    cursor: pointer;
+    box-shadow: 0 1px 4px #0001;
+    margin-left: 8px;
+    transition: background 0.18s, box-shadow 0.18s;
+}
+
+.cr-header-edit-btn:hover,
+.cr-header-edit-btn:focus {
+    background: #1e40af;
+    box-shadow: 0 2px 8px #2563eb22;
+}
+
+.cr-main-btn {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 10px 24px;
+    font-weight: 700;
+    font-size: 16px;
+    box-shadow: 0 1px 4px #0001;
+    cursor: pointer;
+    transition: background 0.18s, box-shadow 0.18s;
+    margin-bottom: 18px;
+}
+
+.cr-main-btn:hover,
+.cr-main-btn:focus {
+    background: #1e40af;
+    box-shadow: 0 2px 8px #2563eb22;
+}
+
+.cr-main-btn.excel {
+    background: #198754;
+    color: #fff;
+    margin-left: 12px;
+}
+
+.cr-main-btn.excel:hover,
+.cr-main-btn.excel:focus {
+    background: #146c43;
+    box-shadow: 0 2px 8px #19875422;
+}

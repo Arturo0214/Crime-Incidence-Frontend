@@ -345,7 +345,7 @@ const Map = ({ onQuadrantClick }) => {
         if (count < 6) return '#FF9800'; // Naranja
         return '#F44336'; // Rojo
     };
-    
+
     const cuadranteStyle = (feature) => {
         try {
             const quadrantNumber = feature.properties.no_cdrn;
@@ -747,7 +747,7 @@ const Map = ({ onQuadrantClick }) => {
 
     if (loading) {
         return (
-            <div className="map-container d-flex justify-content-center align-items-center">
+            <div className="spinner-container">
                 <div className="spinner-border text-primary" role="status">
                     <span className="visually-hidden">Cargando...</span>
                 </div>

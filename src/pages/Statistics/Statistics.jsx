@@ -515,7 +515,7 @@ const Statistics = () => {
 
     if (loading) {
         return (
-            <div className="d-flex justify-content-center align-items-center" style={{ height: '400px' }}>
+            <div className="spinner-container">
                 <div className="spinner-border text-primary" role="status">
                     <span className="visually-hidden">Cargando...</span>
                 </div>
@@ -546,11 +546,11 @@ const Statistics = () => {
             <div className={isMobile ? "stats-filters-mobile" : "stats-filters"}>
                 <div className="stats-filter-item-mobile">
                     <label>Desde</label>
-                    <input type="date" className="stats-date-input form-control" value={filters.from} onChange={e => setFilters(f => ({ ...f, from: e.target.value }))} />
+                    <input type="date" className="date-filter-black stats-date-input form-control" value={filters.from} onChange={e => setFilters(f => ({ ...f, from: e.target.value }))} />
                 </div>
                 <div className="stats-filter-item-mobile">
                     <label>Hasta</label>
-                    <input type="date" className="stats-date-input form-control" value={filters.to} onChange={e => setFilters(f => ({ ...f, to: e.target.value }))} />
+                    <input type="date" className="date-filter-black stats-date-input form-control" value={filters.to} onChange={e => setFilters(f => ({ ...f, to: e.target.value }))} />
                 </div>
                 <div className="stats-filter-item-mobile">
                     <label>Impacto</label>

@@ -561,13 +561,11 @@ const Gabinete = () => {
 
     if (loading) {
         return (
-            <Container fluid className="gabinete-container py-4">
-                <div className="text-center">
-                    <div className="spinner-border text-primary" role="status">
-                        <span className="visually-hidden">Cargando...</span>
-                    </div>
+            <div className="spinner-container">
+                <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Cargando...</span>
                 </div>
-            </Container>
+            </div>
         );
     }
 

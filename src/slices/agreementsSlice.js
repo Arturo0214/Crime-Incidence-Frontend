@@ -3,7 +3,9 @@ import {
     getAgreements,
     addCommentToAgreement,
     editCommentInAgreement,
-    deleteCommentFromAgreement
+    deleteCommentFromAgreement,
+    updateAgreement,
+    deleteAgreement
 } from '../services/agreements';
 
 // Thunks
@@ -51,6 +53,30 @@ export const deleteComment = createAsyncThunk(
             return { agreementId, commentId, data };
         } catch (error) {
             return rejectWithValue(error.message || 'Error al eliminar comentario');
+        }
+    }
+);
+
+export const editAgreement = createAsyncThunk(
+    'agreements/editAgreement',
+    async ({ id, data }, { rejectWithValue }) => {
+        try {
+            const result = await updateAgreement(id, data);
+            return result;
+        } catch (error) {
+            return rejectWithValue(error.message || 'Error al editar acuerdo');
+        }
+    }
+);
+
+export const removeAgreement = createAsyncThunk(
+    'agreements/removeAgreement',
+    async (id, { rejectWithValue }) => {
+        try {
+            await deleteAgreement(id);
+            return id;
+        } catch (error) {
+            return rejectWithValue(error.message || 'Error al eliminar acuerdo');
         }
     }
 );
@@ -109,6 +135,17 @@ const agreementsSlice = createSlice({
                         agreement.comments = agreement.comments.filter((c, idx) => idx !== action.payload.commentId);
                     }
                 }
+            })
+            // Edit Agreement
+            .addCase(editAgreement.fulfilled, (state, action) => {
+                const agreement = state.agreements.find(a => a._id === action.payload._id);
+                if (agreement) {
+                    agreement.comments = action.payload.comments;
+                }
+            })
+            // Remove Agreement
+            .addCase(removeAgreement.fulfilled, (state, action) => {
+                state.agreements = state.agreements.filter(a => a._id !== action.payload);
             });
     }
 });
