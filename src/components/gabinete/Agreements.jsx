@@ -617,6 +617,35 @@ const Agreements = () => {
                                                         </Form.Group>
                                                     </div>
                                                 </div>
+                                                <div className="row mb-3">
+                                                    <div className="col-md-6">
+                                                        <Form.Group>
+                                                            <Form.Label>Fecha de la minuta</Form.Label>
+                                                            <Form.Control
+                                                                type="date"
+                                                                value={editAgreementForm.date ? new Date(editAgreementForm.date).toISOString().split('T')[0] : ''}
+                                                                onChange={e => setEditAgreementForm(f => ({ ...f, date: e.target.value }))}
+                                                                required
+                                                                className="date-filter-black"
+                                                            />
+                                                        </Form.Group>
+                                                    </div>
+                                                    <div className="col-md-6">
+                                                        <Form.Group>
+                                                            <Form.Label>Estado</Form.Label>
+                                                            <Form.Select
+                                                                value={editAgreementForm.status || 'pendiente'}
+                                                                onChange={e => setEditAgreementForm(f => ({ ...f, status: e.target.value }))}
+                                                            >
+                                                                <option value="pendiente">Pendiente</option>
+                                                                <option value="en_progreso">En progreso</option>
+                                                                <option value="completado">Completado</option>
+                                                                <option value="cancelado">Cancelado</option>
+                                                                <option value="informacion">Información</option>
+                                                            </Form.Select>
+                                                        </Form.Group>
+                                                    </div>
+                                                </div>
                                                 <div className="agreement-actions">
                                                     <Button size="sm" variant="success" onClick={() => handleSaveEditAgreement(agreement._id)}>Guardar</Button>
                                                     <Button size="sm" variant="secondary" onClick={() => setEditingAgreementId(null)}>Cancelar</Button>
@@ -829,6 +858,35 @@ const Agreements = () => {
                                                                     required
                                                                     className="date-filter-black"
                                                                 />
+                                                            </Form.Group>
+                                                        </div>
+                                                    </div>
+                                                    <div className="row mb-3">
+                                                        <div className="col-md-6">
+                                                            <Form.Group>
+                                                                <Form.Label>Fecha de la minuta</Form.Label>
+                                                                <Form.Control
+                                                                    type="date"
+                                                                    value={editAgreementForm.date ? new Date(editAgreementForm.date).toISOString().split('T')[0] : ''}
+                                                                    onChange={e => setEditAgreementForm(f => ({ ...f, date: e.target.value }))}
+                                                                    required
+                                                                    className="date-filter-black"
+                                                                />
+                                                            </Form.Group>
+                                                        </div>
+                                                        <div className="col-md-6">
+                                                            <Form.Group>
+                                                                <Form.Label>Estado</Form.Label>
+                                                                <Form.Select
+                                                                    value={editAgreementForm.status || 'pendiente'}
+                                                                    onChange={e => setEditAgreementForm(f => ({ ...f, status: e.target.value }))}
+                                                                >
+                                                                    <option value="pendiente">Pendiente</option>
+                                                                    <option value="en_progreso">En progreso</option>
+                                                                    <option value="completado">Completado</option>
+                                                                    <option value="cancelado">Cancelado</option>
+                                                                    <option value="informacion">Información</option>
+                                                                </Form.Select>
                                                             </Form.Group>
                                                         </div>
                                                     </div>
