@@ -33,13 +33,24 @@ const Agreements = () => {
     useEffect(() => {
         if (!hasFetchedRef.current) {
             console.log('Initial fetch of agreements');
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.error('No authentication token found');
+                return;
+            }
+
             dispatch(fetchAgreements())
                 .unwrap()
-                .then(() => {
-                    console.log('Agreements fetched successfully');
+                .then((response) => {
+                    console.log('Agreements fetched successfully:', response);
                 })
                 .catch((error) => {
                     console.error('Error fetching agreements:', error);
+                    // Si el error es por formato inválido, intentar recargar la página
+                    if (error.message === 'Server returned invalid response format') {
+                        console.log('Attempting to reload page...');
+                        window.location.reload();
+                    }
                 });
             hasFetchedRef.current = true;
         }
@@ -115,15 +126,23 @@ const Agreements = () => {
             <div className="alert alert-danger m-3">
                 <h5>Error al cargar los acuerdos</h5>
                 <p>{error}</p>
-                <Button
-                    variant="outline-danger"
-                    onClick={() => {
-                        hasFetchedRef.current = false;
-                        dispatch(fetchAgreements());
-                    }}
-                >
-                    Reintentar
-                </Button>
+                <div className="d-flex gap-2">
+                    <Button
+                        variant="outline-danger"
+                        onClick={() => {
+                            hasFetchedRef.current = false;
+                            dispatch(fetchAgreements());
+                        }}
+                    >
+                        Reintentar
+                    </Button>
+                    <Button
+                        variant="outline-primary"
+                        onClick={() => window.location.reload()}
+                    >
+                        Recargar página
+                    </Button>
+                </div>
             </div>
         );
     }
