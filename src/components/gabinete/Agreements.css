@@ -445,6 +445,7 @@
 .date-filter-black {
     color: black !important;
     background-color: white !important;
+    -webkit-text-fill-color: black !important;
 }
 
 .date-filter-black::-webkit-calendar-picker-indicator {
@@ -454,20 +455,43 @@
 
 .date-filter-black::-webkit-datetime-edit {
     color: black !important;
+    -webkit-text-fill-color: black !important;
 }
 
 .date-filter-black::-webkit-datetime-edit-fields-wrapper {
     color: black !important;
+    -webkit-text-fill-color: black !important;
 }
 
 .date-filter-black::-webkit-datetime-edit-text {
     color: black !important;
+    -webkit-text-fill-color: black !important;
 }
 
 .date-filter-black::-webkit-datetime-edit-month-field,
 .date-filter-black::-webkit-datetime-edit-day-field,
 .date-filter-black::-webkit-datetime-edit-year-field {
     color: black !important;
+    -webkit-text-fill-color: black !important;
+}
+
+/* Forzar color negro en el input de fecha en dispositivos móviles */
+@media (max-width: 600px) {
+    .date-filter-black {
+        color: black !important;
+        background-color: white !important;
+        -webkit-text-fill-color: black !important;
+    }
+
+    .date-filter-black::-webkit-datetime-edit,
+    .date-filter-black::-webkit-datetime-edit-fields-wrapper,
+    .date-filter-black::-webkit-datetime-edit-text,
+    .date-filter-black::-webkit-datetime-edit-month-field,
+    .date-filter-black::-webkit-datetime-edit-day-field,
+    .date-filter-black::-webkit-datetime-edit-year-field {
+        color: black !important;
+        -webkit-text-fill-color: black !important;
+    }
 }
 
 /* Forzar color negro en el input de fecha, placeholder y caret */
