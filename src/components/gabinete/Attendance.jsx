@@ -67,6 +67,7 @@ const Attendance = () => {
         });
     }
     const getLocalDateOnly = (dateString) => {
+        if (!dateString) return new Date();
         const datePart = dateString.split('T')[0];
         if (!datePart) return new Date();
         const [year, month, day] = datePart.split('-').map(num => parseInt(num, 10));
@@ -94,6 +95,7 @@ const Attendance = () => {
     const weekEnd = new Date(weekDates[4]);
     weekEnd.setHours(23, 59, 59, 999);
     const weekAttendance = attendance.filter(a => {
+        if (!a || !a.date) return false; // Ignorar registros sin fecha
         const attendanceLocalDate = getLocalDateOnly(a.date);
         return attendanceLocalDate >= weekStart && attendanceLocalDate <= weekEnd;
     });
@@ -107,7 +109,9 @@ const Attendance = () => {
         };
     });
     weekAttendance.forEach(a => {
+        if (!a || !a.participants) return; // Ignorar registros inválidos
         a.participants.forEach(p => {
+            if (!p || !p.participantId) return; // Ignorar participantes inválidos
             const id = String(p.participantId._id || p.participantId);
             if (summary[id]) {
                 summary[id].week[p.attendance]++;
@@ -116,6 +120,7 @@ const Attendance = () => {
     });
     const now = new Date();
     const monthAttendance = attendance.filter(a => {
+        if (!a || !a.date) return false; // Ignorar registros sin fecha
         const d = new Date(a.date);
         if (selectedMonth) {
             const [selectedYear, selectedMonthNum] = selectedMonth.split('-').map(Number);
@@ -124,7 +129,9 @@ const Attendance = () => {
         return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
     });
     monthAttendance.forEach(a => {
+        if (!a || !a.participants) return; // Ignorar registros inválidos
         a.participants.forEach(p => {
+            if (!p || !p.participantId) return; // Ignorar participantes inválidos
             const id = String(p.participantId._id || p.participantId);
             if (summary[id]) {
                 summary[id].month[p.attendance]++;
