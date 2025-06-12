@@ -104,12 +104,34 @@ const Statistics = () => {
     const [visibleQuadrants, setVisibleQuadrants] = useState(Array(12).fill(true));
     const [visibleQuadrantsBar, setVisibleQuadrantsBar] = useState(Array(12).fill(true));
     const [isMobile, setIsMobile] = useState(false);
+    const [dateRangeInfo, setDateRangeInfo] = useState({
+        start: null,
+        end: null,
+        oldestAvailable: null
+    });
 
     useEffect(() => {
         const fetchStats = async () => {
             try {
                 const data = await getIncidents();
-                setStats({ incidents: data.data });
+                // Ordenar incidentes por fecha
+                const sortedIncidents = data.data.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                // Encontrar la fecha más antigua y más reciente
+                const oldestDate = new Date(Math.min(...sortedIncidents.map(inc => new Date(inc.date))));
+                const newestDate = new Date(Math.max(...sortedIncidents.map(inc => new Date(inc.date))));
+
+                // Calcular la fecha de inicio para los últimos 30 días
+                const thirtyDaysAgo = new Date(newestDate);
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+                setDateRangeInfo({
+                    start: thirtyDaysAgo,
+                    end: newestDate,
+                    oldestAvailable: oldestDate
+                });
+
+                setStats({ incidents: sortedIncidents });
                 setLoading(false);
             } catch (err) {
                 setError('Error al cargar las estadísticas');
@@ -270,6 +292,15 @@ const Statistics = () => {
         if (delitoTipo !== 'all') {
             pass = pass && i.crimeType === delitoTipo;
         }
+
+        // Si no hay filtros de fecha específicos, mostrar solo los últimos 30 días
+        if (!filters.from && !filters.to) {
+            const incidentDate = new Date(i.date);
+            const thirtyDaysAgo = new Date(dateRangeInfo.end);
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            if (incidentDate < thirtyDaysAgo) return false;
+        }
+
         return pass;
     });
 
@@ -542,6 +573,45 @@ const Statistics = () => {
     return (
         <div className="statistics-container">
             <h2 className={isMobile ? 'statistics-title-mobile' : ''}>Estadísticas de Incidentes en Tlatelolco</h2>
+
+            {/* Leyenda de fechas */}
+            <div className="date-range-info" style={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '1rem',
+                marginBottom: '1.5rem',
+                flexWrap: 'wrap'
+            }}>
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    background: '#f8fafc',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '8px',
+                    border: '1px solid #e2e8f0',
+                    fontSize: '0.9rem',
+                    color: '#1e293b'
+                }}>
+                    <span style={{ fontWeight: '600' }}>Últimos 30 días:</span>
+                    <span>{dateRangeInfo.start?.toLocaleDateString()} - {dateRangeInfo.end?.toLocaleDateString()}</span>
+                </div>
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    background: '#f8fafc',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '8px',
+                    border: '1px solid #e2e8f0',
+                    fontSize: '0.9rem',
+                    color: '#1e293b'
+                }}>
+                    <span style={{ fontWeight: '600' }}>Datos disponibles desde:</span>
+                    <span>{dateRangeInfo.oldestAvailable?.toLocaleDateString()}</span>
+                </div>
+            </div>
+
             {/* Filtros globales */}
             <div className={isMobile ? "stats-filters-mobile" : "stats-filters"}>
                 <div className="stats-filter-item-mobile">
