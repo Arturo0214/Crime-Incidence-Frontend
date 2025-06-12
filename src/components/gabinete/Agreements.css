@@ -325,6 +325,14 @@
     border: none;
     border-radius: 12px;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    width: 500px;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+.agreement-modal .modal-dialog {
+    max-width: 500px;
+    margin: 1.75rem auto;
 }
 
 .agreement-modal .modal-header {
@@ -340,6 +348,8 @@
 
 .agreement-modal .modal-body {
     padding: 1.5rem;
+    max-height: calc(100vh - 210px);
+    overflow-y: auto;
 }
 
 .agreement-modal .form-label {
@@ -548,6 +558,31 @@
 .input-dark:focus {
     background: #22313a !important;
     color: #fff !important;
+}
+
+.input-dark::placeholder {
+    color: #fff !important;
+    opacity: 0.7 !important;
+}
+
+.input-dark::-webkit-input-placeholder {
+    color: #fff !important;
+    opacity: 0.7 !important;
+}
+
+.input-dark::-moz-placeholder {
+    color: #fff !important;
+    opacity: 0.7 !important;
+}
+
+.input-dark:-ms-input-placeholder {
+    color: #fff !important;
+    opacity: 0.7 !important;
+}
+
+.input-dark::-ms-input-placeholder {
+    color: #fff !important;
+    opacity: 0.7 !important;
 }
 
 /* Forzar color negro en el input de fecha del modal */

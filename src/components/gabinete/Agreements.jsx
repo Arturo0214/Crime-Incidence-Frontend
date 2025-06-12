@@ -465,7 +465,6 @@ const Agreements = () => {
                                         value={agreement.responsible}
                                         onChange={(e) => updateAgreementForm(index, 'responsible', e.target.value)}
                                         required
-                                        placeholder="Nombre del responsable"
                                         isInvalid={!!validationErrors[index]?.responsible}
                                         disabled={isSubmitting}
                                     />
