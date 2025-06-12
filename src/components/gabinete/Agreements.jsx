@@ -13,12 +13,14 @@ const Agreements = () => {
     const { user } = useSelector(state => state.user);
     const hasFetchedRef = useRef(false);
     const [showAgreementModal, setShowAgreementModal] = useState(false);
-    const [newAgreement, setNewAgreement] = useState({
+    const [agreementsList, setAgreementsList] = useState([{
         title: '',
         description: '',
         date: new Date().toISOString().split('T')[0],
-        status: 'pendiente'
-    });
+        status: 'pendiente',
+        responsible: '',
+        dueDate: new Date().toISOString().split('T')[0]
+    }]);
     const [agreementError, setAgreementError] = useState('');
     const [editingAgreementId, setEditingAgreementId] = useState(null);
     const [editAgreementForm, setEditAgreementForm] = useState({});
@@ -29,67 +31,107 @@ const Agreements = () => {
     const [editCommentText, setEditCommentText] = useState({});
     const [showAllAgreements, setShowAllAgreements] = useState(false);
     const [allStatusFilter, setAllStatusFilter] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [validationErrors, setValidationErrors] = useState({});
 
     useEffect(() => {
         if (!hasFetchedRef.current) {
             console.log('Initial fetch of agreements');
-            const token = localStorage.getItem('token');
-            if (!token) {
-                console.error('No authentication token found');
-                return;
-            }
-
             dispatch(fetchAgreements())
                 .unwrap()
-                .then((response) => {
-                    console.log('Agreements fetched successfully:', response);
+                .then(() => {
+                    console.log('Agreements fetched successfully');
                 })
                 .catch((error) => {
                     console.error('Error fetching agreements:', error);
-                    // Si el error es por formato inválido, intentar recargar la página
-                    if (error.message === 'Server returned invalid response format') {
-                        console.log('Attempting to reload page...');
-                        window.location.reload();
-                    }
                 });
             hasFetchedRef.current = true;
         }
     }, [dispatch]);
 
+    const addNewAgreementForm = () => {
+        setAgreementsList([...agreementsList, {
+            title: '',
+            description: '',
+            date: new Date().toISOString().split('T')[0],
+            status: 'pendiente',
+            responsible: '',
+            dueDate: new Date().toISOString().split('T')[0]
+        }]);
+    };
+
+    const removeAgreementForm = (index) => {
+        const newList = agreementsList.filter((_, i) => i !== index);
+        setAgreementsList(newList);
+    };
+
+    const updateAgreementForm = (index, field, value) => {
+        const newList = [...agreementsList];
+        newList[index] = { ...newList[index], [field]: value };
+        setAgreementsList(newList);
+    };
+
+    const validateAgreement = (agreement) => {
+        const errors = {};
+        if (!agreement.title.trim()) errors.title = 'El título es requerido';
+        if (!agreement.description.trim()) errors.description = 'La descripción es requerida';
+        if (!agreement.responsible.trim()) errors.responsible = 'El responsable es requerido';
+        if (!agreement.dueDate) errors.dueDate = 'La fecha de entrega es requerida';
+        if (!agreement.date) errors.date = 'La fecha de la minuta es requerida';
+        return errors;
+    };
+
     const handleAgreementSubmit = async (e) => {
         e.preventDefault();
-        setAgreementError(''); // Limpiamos errores previos
+        setAgreementError('');
+        setValidationErrors({});
+        setIsSubmitting(true);
 
         try {
-            // Primero creamos el nuevo acuerdo
-            const response = await fetch('/api/agreements', {
+            // Validar todos los acuerdos
+            const errors = {};
+            agreementsList.forEach((agreement, index) => {
+                const agreementErrors = validateAgreement(agreement);
+                if (Object.keys(agreementErrors).length > 0) {
+                    errors[index] = agreementErrors;
+                }
+            });
+
+            if (Object.keys(errors).length > 0) {
+                setValidationErrors(errors);
+                setIsSubmitting(false);
+                return;
+            }
+
+            const response = await fetch('/api/agreements/bulk', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
-                body: JSON.stringify(newAgreement)
+                body: JSON.stringify(agreementsList)
             });
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.message || 'Error al crear el acuerdo');
+                throw new Error(errorData.message || 'Error al crear los acuerdos');
             }
 
-            // Si se creó exitosamente, recargamos los acuerdos
             await dispatch(fetchAgreements()).unwrap();
-
-            // Cerramos el modal y reseteamos el formulario
             setShowAgreementModal(false);
-            setNewAgreement({
+            setAgreementsList([{
                 title: '',
                 description: '',
                 date: new Date().toISOString().split('T')[0],
-                status: 'pendiente'
-            });
+                status: 'pendiente',
+                responsible: '',
+                dueDate: new Date().toISOString().split('T')[0]
+            }]);
         } catch (error) {
-            console.error('Error al crear el acuerdo:', error);
-            setAgreementError(error.message || 'Error al crear el acuerdo');
+            console.error('Error al crear los acuerdos:', error);
+            setAgreementError(error.message || 'Error al crear los acuerdos');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -126,23 +168,15 @@ const Agreements = () => {
             <div className="alert alert-danger m-3">
                 <h5>Error al cargar los acuerdos</h5>
                 <p>{error}</p>
-                <div className="d-flex gap-2">
-                    <Button
-                        variant="outline-danger"
-                        onClick={() => {
-                            hasFetchedRef.current = false;
-                            dispatch(fetchAgreements());
-                        }}
-                    >
-                        Reintentar
-                    </Button>
-                    <Button
-                        variant="outline-primary"
-                        onClick={() => window.location.reload()}
-                    >
-                        Recargar página
-                    </Button>
-                </div>
+                <Button
+                    variant="outline-danger"
+                    onClick={() => {
+                        hasFetchedRef.current = false;
+                        dispatch(fetchAgreements());
+                    }}
+                >
+                    Reintentar
+                </Button>
             </div>
         );
     }
@@ -244,6 +278,19 @@ const Agreements = () => {
         XLSX.writeFile(wb, fileName);
     };
 
+    const getDueDateStatus = (dueDate, status) => {
+        if (status === 'completado') return 'completed';
+
+        const today = new Date();
+        const due = new Date(dueDate);
+        const diffTime = due - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) return 'overdue';
+        if (diffDays <= 3) return 'upcoming';
+        return '';
+    };
+
     return (
         <div className="agreements-section">
             <div className="agreements-header d-flex justify-content-between align-items-center">
@@ -300,56 +347,178 @@ const Agreements = () => {
                 <Modal.Body>
                     {agreementError && (
                         <div className="alert alert-danger mb-3">
+                            <i className="fas fa-exclamation-circle me-2"></i>
                             {agreementError}
                         </div>
                     )}
                     <Form onSubmit={handleAgreementSubmit}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Título</Form.Label>
-                            <Form.Control
-                                type="text"
-                                value={newAgreement.title}
-                                onChange={(e) => setNewAgreement({ ...newAgreement, title: e.target.value })}
-                                required
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Descripción</Form.Label>
-                            <Form.Control
-                                as="textarea"
-                                rows={3}
-                                value={newAgreement.description}
-                                onChange={(e) => setNewAgreement({ ...newAgreement, description: e.target.value })}
-                                required
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Fecha</Form.Label>
-                            <Form.Control
-                                type="date"
-                                value={newAgreement.date}
-                                onChange={(e) => setNewAgreement({ ...newAgreement, date: e.target.value })}
-                                required
-                                className="date-filter-black"
-                                placeholder="YYYY-MM-DD"
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Estado</Form.Label>
-                            <Form.Select
-                                value={newAgreement.status}
-                                onChange={(e) => setNewAgreement({ ...newAgreement, status: e.target.value })}
+                        {agreementsList.map((agreement, index) => (
+                            <div key={index} className="agreement-form-container mb-4">
+                                <div className="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 className="mb-0">Acuerdo {index + 1}</h6>
+                                    {index > 0 && (
+                                        <Button
+                                            variant="outline-danger"
+                                            size="sm"
+                                            onClick={() => removeAgreementForm(index)}
+                                            disabled={isSubmitting}
+                                        >
+                                            <i className="fas fa-trash-alt me-1"></i>
+                                            Eliminar
+                                        </Button>
+                                    )}
+                                </div>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>
+                                        Título
+                                        {validationErrors[index]?.title && (
+                                            <span className="text-danger ms-2">
+                                                <i className="fas fa-exclamation-circle"></i>
+                                                {validationErrors[index].title}
+                                            </span>
+                                        )}
+                                    </Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        value={agreement.title}
+                                        onChange={(e) => updateAgreementForm(index, 'title', e.target.value)}
+                                        required
+                                        isInvalid={!!validationErrors[index]?.title}
+                                        disabled={isSubmitting}
+                                    />
+                                </Form.Group>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>
+                                        Descripción
+                                        {validationErrors[index]?.description && (
+                                            <span className="text-danger ms-2">
+                                                <i className="fas fa-exclamation-circle"></i>
+                                                {validationErrors[index].description}
+                                            </span>
+                                        )}
+                                    </Form.Label>
+                                    <Form.Control
+                                        as="textarea"
+                                        rows={3}
+                                        value={agreement.description}
+                                        onChange={(e) => updateAgreementForm(index, 'description', e.target.value)}
+                                        required
+                                        isInvalid={!!validationErrors[index]?.description}
+                                        disabled={isSubmitting}
+                                    />
+                                </Form.Group>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>
+                                        Estado
+                                        {validationErrors[index]?.status && (
+                                            <span className="text-danger ms-2">
+                                                <i className="fas fa-exclamation-circle"></i>
+                                                {validationErrors[index].status}
+                                            </span>
+                                        )}
+                                    </Form.Label>
+                                    <Form.Select
+                                        value={agreement.status}
+                                        onChange={(e) => updateAgreementForm(index, 'status', e.target.value)}
+                                        isInvalid={!!validationErrors[index]?.status}
+                                        disabled={isSubmitting}
+                                    >
+                                        <option value="pendiente">Pendiente</option>
+                                        <option value="en_progreso">En progreso</option>
+                                        <option value="completado">Completado</option>
+                                        <option value="cancelado">Cancelado</option>
+                                        <option value="informacion">Información</option>
+                                    </Form.Select>
+                                </Form.Group>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>
+                                        Fecha de entrega
+                                        {validationErrors[index]?.dueDate && (
+                                            <span className="text-danger ms-2">
+                                                <i className="fas fa-exclamation-circle"></i>
+                                                {validationErrors[index].dueDate}
+                                            </span>
+                                        )}
+                                    </Form.Label>
+                                    <Form.Control
+                                        type="date"
+                                        value={agreement.dueDate}
+                                        onChange={(e) => updateAgreementForm(index, 'dueDate', e.target.value)}
+                                        required
+                                        className="date-filter-black"
+                                        isInvalid={!!validationErrors[index]?.dueDate}
+                                        disabled={isSubmitting}
+                                    />
+                                </Form.Group>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>
+                                        Responsable
+                                        {validationErrors[index]?.responsible && (
+                                            <span className="text-danger ms-2">
+                                                <i className="fas fa-exclamation-circle"></i>
+                                                {validationErrors[index].responsible}
+                                            </span>
+                                        )}
+                                    </Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        value={agreement.responsible}
+                                        onChange={(e) => updateAgreementForm(index, 'responsible', e.target.value)}
+                                        required
+                                        placeholder="Nombre del responsable"
+                                        isInvalid={!!validationErrors[index]?.responsible}
+                                        disabled={isSubmitting}
+                                    />
+                                </Form.Group>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>
+                                        Fecha de la minuta
+                                        {validationErrors[index]?.date && (
+                                            <span className="text-danger ms-2">
+                                                <i className="fas fa-exclamation-circle"></i>
+                                                {validationErrors[index].date}
+                                            </span>
+                                        )}
+                                    </Form.Label>
+                                    <Form.Control
+                                        type="date"
+                                        value={agreement.date}
+                                        onChange={(e) => updateAgreementForm(index, 'date', e.target.value)}
+                                        required
+                                        className="date-filter-black"
+                                        isInvalid={!!validationErrors[index]?.date}
+                                        disabled={isSubmitting}
+                                    />
+                                </Form.Group>
+                            </div>
+                        ))}
+                        <div className="d-flex justify-content-between align-items-center mb-3">
+                            <Button
+                                variant="outline-primary"
+                                onClick={addNewAgreementForm}
+                                type="button"
+                                disabled={isSubmitting}
                             >
-                                <option value="pendiente">Pendiente</option>
-                                <option value="en_progreso">En progreso</option>
-                                <option value="completado">Completado</option>
-                                <option value="cancelado">Cancelado</option>
-                                <option value="informacion">Información</option>
-                            </Form.Select>
-                        </Form.Group>
-                        <div className="text-center">
-                            <Button variant="primary" type="submit" className="px-4">
-                                Crear Acuerdo
+                                <i className="fas fa-plus me-1"></i>
+                                Agregar otro acuerdo
+                            </Button>
+                            <Button
+                                variant="primary"
+                                type="submit"
+                                className="px-4"
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? (
+                                    <>
+                                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        Creando acuerdos...
+                                    </>
+                                ) : (
+                                    <>
+                                        <i className="fas fa-save me-2"></i>
+                                        Crear Acuerdos
+                                    </>
+                                )}
                             </Button>
                         </div>
                     </Form>
@@ -413,6 +582,21 @@ const Agreements = () => {
                                                 </span>
                                             </div>
                                         </div>
+                                        <div className="agreement-details mb-3">
+                                            <div className="agreement-responsible">
+                                                <strong>Responsable:</strong> {agreement.responsible}
+                                            </div>
+                                            <div className="agreement-due-date">
+                                                <strong>Fecha de entrega:</strong>
+                                                <span className={getDueDateStatus(agreement.dueDate, agreement.status)}>
+                                                    {new Date(agreement.dueDate).toLocaleDateString('es-MX', {
+                                                        year: 'numeric',
+                                                        month: 'long',
+                                                        day: 'numeric'
+                                                    })}
+                                                </span>
+                                            </div>
+                                        </div>
                                         {editingAgreementId === agreement._id ? (
                                             <>
                                                 <textarea
@@ -421,6 +605,31 @@ const Agreements = () => {
                                                     className="form-control mb-3"
                                                     rows={3}
                                                 />
+                                                <div className="row mb-3">
+                                                    <div className="col-md-6">
+                                                        <Form.Group>
+                                                            <Form.Label>Responsable</Form.Label>
+                                                            <Form.Control
+                                                                type="text"
+                                                                value={editAgreementForm.responsible || ''}
+                                                                onChange={e => setEditAgreementForm(f => ({ ...f, responsible: e.target.value }))}
+                                                                required
+                                                            />
+                                                        </Form.Group>
+                                                    </div>
+                                                    <div className="col-md-6">
+                                                        <Form.Group>
+                                                            <Form.Label>Fecha de entrega</Form.Label>
+                                                            <Form.Control
+                                                                type="date"
+                                                                value={editAgreementForm.dueDate ? new Date(editAgreementForm.dueDate).toISOString().split('T')[0] : ''}
+                                                                onChange={e => setEditAgreementForm(f => ({ ...f, dueDate: e.target.value }))}
+                                                                required
+                                                                className="date-filter-black"
+                                                            />
+                                                        </Form.Group>
+                                                    </div>
+                                                </div>
                                                 <div className="agreement-actions">
                                                     <Button size="sm" variant="success" onClick={() => handleSaveEditAgreement(agreement._id)}>Guardar</Button>
                                                     <Button size="sm" variant="secondary" onClick={() => setEditingAgreementId(null)}>Cancelar</Button>
@@ -438,7 +647,9 @@ const Agreements = () => {
                                                                     title: agreement.title,
                                                                     description: agreement.description,
                                                                     date: agreement.date ? new Date(agreement.date).toISOString().slice(0, 10) : '',
-                                                                    status: agreement.status
+                                                                    status: agreement.status,
+                                                                    responsible: agreement.responsible,
+                                                                    dueDate: agreement.dueDate ? new Date(agreement.dueDate).toISOString().slice(0, 10) : ''
                                                                 });
                                                             }}>Editar</Button>
                                                             <Button size="sm" variant="outline-danger" onClick={() => handleDeleteAgreement(agreement._id)}>Eliminar</Button>
@@ -586,6 +797,21 @@ const Agreements = () => {
                                                     </span>
                                                 </div>
                                             </div>
+                                            <div className="agreement-details mb-3">
+                                                <div className="agreement-responsible">
+                                                    <strong>Responsable:</strong> {agreement.responsible}
+                                                </div>
+                                                <div className="agreement-due-date">
+                                                    <strong>Fecha de entrega:</strong>
+                                                    <span className={getDueDateStatus(agreement.dueDate, agreement.status)}>
+                                                        {new Date(agreement.dueDate).toLocaleDateString('es-MX', {
+                                                            year: 'numeric',
+                                                            month: 'long',
+                                                            day: 'numeric'
+                                                        })}
+                                                    </span>
+                                                </div>
+                                            </div>
                                             {editingAgreementId === agreement._id ? (
                                                 <>
                                                     <textarea
@@ -594,6 +820,31 @@ const Agreements = () => {
                                                         className="form-control mb-3"
                                                         rows={3}
                                                     />
+                                                    <div className="row mb-3">
+                                                        <div className="col-md-6">
+                                                            <Form.Group>
+                                                                <Form.Label>Responsable</Form.Label>
+                                                                <Form.Control
+                                                                    type="text"
+                                                                    value={editAgreementForm.responsible || ''}
+                                                                    onChange={e => setEditAgreementForm(f => ({ ...f, responsible: e.target.value }))}
+                                                                    required
+                                                                />
+                                                            </Form.Group>
+                                                        </div>
+                                                        <div className="col-md-6">
+                                                            <Form.Group>
+                                                                <Form.Label>Fecha de entrega</Form.Label>
+                                                                <Form.Control
+                                                                    type="date"
+                                                                    value={editAgreementForm.dueDate ? new Date(editAgreementForm.dueDate).toISOString().split('T')[0] : ''}
+                                                                    onChange={e => setEditAgreementForm(f => ({ ...f, dueDate: e.target.value }))}
+                                                                    required
+                                                                    className="date-filter-black"
+                                                                />
+                                                            </Form.Group>
+                                                        </div>
+                                                    </div>
                                                     <div className="agreement-actions">
                                                         <Button size="sm" variant="success" onClick={() => handleSaveEditAgreement(agreement._id)}>Guardar</Button>
                                                         <Button size="sm" variant="secondary" onClick={() => setEditingAgreementId(null)}>Cancelar</Button>
@@ -611,7 +862,9 @@ const Agreements = () => {
                                                                         title: agreement.title,
                                                                         description: agreement.description,
                                                                         date: agreement.date ? new Date(agreement.date).toISOString().slice(0, 10) : '',
-                                                                        status: agreement.status
+                                                                        status: agreement.status,
+                                                                        responsible: agreement.responsible,
+                                                                        dueDate: agreement.dueDate ? new Date(agreement.dueDate).toISOString().slice(0, 10) : ''
                                                                     });
                                                                 }}>Editar</Button>
                                                                 <Button size="sm" variant="outline-danger" onClick={() => handleDeleteAgreement(agreement._id)}>Eliminar</Button>

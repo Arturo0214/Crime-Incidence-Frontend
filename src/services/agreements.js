@@ -4,10 +4,20 @@ export const API_URL = process.env.REACT_APP_API_URL || 'https://crime-incidence
 
 export const getAgreements = async () => {
     try {
+        console.log('Fetching agreements...');
+        const token = localStorage.getItem('token');
+        console.log('Token exists:', !!token);
+
         const response = await axiosInstance.get('/agreements');
+        console.log('Agreements response:', response);
         return response.data;
     } catch (error) {
         console.error('Error al obtener acuerdos:', error);
+        if (error.response) {
+            console.error('Response data:', error.response.data);
+            console.error('Response status:', error.response.status);
+            console.error('Response headers:', error.response.headers);
+        }
         throw error;
     }
 };

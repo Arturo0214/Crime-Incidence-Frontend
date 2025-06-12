@@ -115,7 +115,10 @@ const agreementsSlice = createSlice({
             .addCase(addComment.fulfilled, (state, action) => {
                 const agreement = state.agreements.find(a => a._id === action.payload.agreementId);
                 if (agreement) {
-                    agreement.comments = action.payload.comments;
+                    if (!agreement.comments) {
+                        agreement.comments = [];
+                    }
+                    agreement.comments.push(action.payload.comment);
                 }
             })
             // Edit Comment
