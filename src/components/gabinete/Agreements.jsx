@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Row, Col, Card, Button, Modal, Form } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAgreements, addComment, editComment, deleteComment, editAgreement, removeAgreement } from '../../slices/agreementsSlice';
+import { createAgreementsBulk } from '../../services/agreements';
 import './Agreements.css';
 import { jwtDecode } from 'jwt-decode';
 import { isAdmin } from '../../utils/auth';
@@ -103,20 +104,7 @@ const Agreements = () => {
                 return;
             }
 
-            const response = await fetch('/api/agreements/bulk', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify(agreementsList)
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Error al crear los acuerdos');
-            }
-
+            await createAgreementsBulk(agreementsList);
             await dispatch(fetchAgreements()).unwrap();
             setShowAgreementModal(false);
             setAgreementsList([{
@@ -129,7 +117,7 @@ const Agreements = () => {
             }]);
         } catch (error) {
             console.error('Error al crear los acuerdos:', error);
-            setAgreementError(error.message || 'Error al crear los acuerdos');
+            setAgreementError(error.response?.data?.message || error.message || 'Error al crear los acuerdos');
         } finally {
             setIsSubmitting(false);
         }
