@@ -678,7 +678,7 @@
 
     .cuadrante-popup,
     .incident-popup {
-        max-width: 85vw !important;
+        max-width: 100vw !important;
         min-width: 0 !important;
         max-height: 45vh !important;
         overflow-y: auto !important;
@@ -1497,7 +1497,7 @@
     border-radius: 4px;
     padding: 1px 6px;
     min-width: 18px;
-    text-align: right;
+    text-align: left;
     font-variant-numeric: tabular-nums;
     display: inline-block;
     margin-left: 4px;
@@ -1900,4 +1900,23 @@
     background: #fef9c3;
     color: #b45309;
     border: 1px solid #ffe066;
+}
+
+@media (max-width: 600px) {
+    .incident-popup-content .row {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        margin-bottom: 6px;
+        padding-bottom: 2px;
+    }
+    .incident-popup-content .label {
+        font-weight: 600;
+        margin-bottom: 2px;
+        width: 100%;
+    }
+    .incident-popup-content .value {
+        margin-left: 0;
+        width: 100%;
+    }
 }
