@@ -767,86 +767,83 @@ const Agreements = () => {
             </div>
             {/* Sección de todos los acuerdos */}
             {showAllAgreements && (
-                <div className="all-agreements-section mt-5">
+                <div className="mt-5">
                     <div className="d-flex justify-content-between align-items-center mb-3">
                         <h5 className="mb-0">Todos los acuerdos</h5>
                         <Button variant="outline-secondary" onClick={() => setShowAllAgreements(false)}>
                             Ocultar todos los acuerdos
                         </Button>
                     </div>
-                    <div className="all-agreements-filters mb-3 styled-filters">
-                        <div className="filters-row d-flex flex-wrap align-items-end gap-3">
-                            <div style={{ minWidth: 150 }}>
-                                <Form.Label className="agreement-filter-title">Filtrar por estado</Form.Label>
-                                <Form.Select
-                                    value={allStatusFilter}
-                                    onChange={e => setAllStatusFilter(e.target.value)}
-                                    className="filter-field"
-                                >
-                                    <option value="">Todos los estados</option>
-                                    <option value="pendiente">Pendiente</option>
-                                    <option value="en_progreso">En progreso</option>
-                                    <option value="completado">Completado</option>
-                                    <option value="cancelado">Cancelado</option>
-                                    <option value="informacion">Información</option>
-                                </Form.Select>
-                            </div>
-                            <div style={{ minWidth: 150 }}>
-                                <Form.Label className="agreement-filter-title">Ordenar por fecha</Form.Label>
-                                <div className="d-flex gap-2">
-                                    <Button
-                                        variant={sortOrder === 'newest' ? 'primary' : 'outline-primary'}
-                                        size="sm"
-                                        onClick={() => setSortOrder('newest')}
-                                        className="w-100"
-                                    >
-                                        <i className="fas fa-arrow-down me-1"></i>
-                                        Recientes
-                                    </Button>
-                                    <Button
-                                        variant={sortOrder === 'oldest' ? 'primary' : 'outline-primary'}
-                                        size="sm"
-                                        onClick={() => setSortOrder('oldest')}
-                                        className="w-100"
-                                    >
-                                        <i className="fas fa-arrow-up me-1"></i>
-                                        Antiguos
-                                    </Button>
-                                </div>
-                            </div>
-                            <div style={{ minWidth: 150 }}>
-                                <Form.Label className="agreement-filter-title">Filtrar por responsable</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Nombre del responsable..."
-                                    value={responsibleFilter}
-                                    onChange={(e) => setResponsibleFilter(e.target.value)}
-                                    className="filter-field"
-                                />
-                            </div>
-                            <div style={{ minWidth: 180 }}>
-                                <Form.Label className="agreement-filter-title">Rango de fechas</Form.Label>
-                                <div className="d-flex gap-2">
-                                    <Form.Control
-                                        type="date"
-                                        value={dateRangeFilter.from}
-                                        onChange={(e) => setDateRangeFilter(prev => ({ ...prev, from: e.target.value }))}
-                                        className="date-filter-black filter-field"
-                                    />
-                                    <Form.Control
-                                        type="date"
-                                        value={dateRangeFilter.to}
-                                        onChange={(e) => setDateRangeFilter(prev => ({ ...prev, to: e.target.value }))}
-                                        className="date-filter-black filter-field"
-                                    />
-                                </div>
-                            </div>
-                            <div className="ms-auto d-flex flex-column align-items-end" style={{ minWidth: 180 }}>
-                                <Form.Label className="agreement-filter-title" style={{ visibility: 'hidden' }}>Generar Excel</Form.Label>
-                                <Button variant="success" className="report-button" onClick={handleExportAllAgreementsExcel}>
-                                    <i className="fas fa-file-excel me-2"></i>
-                                    Generar Excel
-                                </Button>
+                    <div className="styled-filters mb-3">
+                        <div className="filters-row">
+                            <div className="filter-group" style={{ minWidth: '100%', maxWidth: '100%' }}>
+                                <Row>
+                                    <Col xs={12} sm={6} md={3} className="mb-3 mb-md-0">
+                                        <Form.Label className="agreement-filter-title">Filtrar por estado</Form.Label>
+                                        <Form.Select
+                                            value={allStatusFilter}
+                                            onChange={e => setAllStatusFilter(e.target.value)}
+                                            className="filter-field w-100"
+                                        >
+                                            <option value="">Todos los estados</option>
+                                            <option value="pendiente">Pendiente</option>
+                                            <option value="en_progreso">En progreso</option>
+                                            <option value="completado">Completado</option>
+                                            <option value="cancelado">Cancelado</option>
+                                            <option value="informacion">Información</option>
+                                        </Form.Select>
+                                    </Col>
+                                    <Col xs={12} sm={6} md={3} className="mb-3 mb-md-0">
+                                        <Form.Label className="agreement-filter-title">Ordenar por fecha</Form.Label>
+                                        <div className="d-flex gap-2">
+                                            <Button
+                                                variant={sortOrder === 'newest' ? 'primary' : 'outline-primary'}
+                                                size="sm"
+                                                onClick={() => setSortOrder('newest')}
+                                                className="w-100"
+                                            >
+                                                <i className="fas fa-arrow-down me-1"></i>
+                                                Recientes
+                                            </Button>
+                                            <Button
+                                                variant={sortOrder === 'oldest' ? 'primary' : 'outline-primary'}
+                                                size="sm"
+                                                onClick={() => setSortOrder('oldest')}
+                                                className="w-100"
+                                            >
+                                                <i className="fas fa-arrow-up me-1"></i>
+                                                Antiguos
+                                            </Button>
+                                        </div>
+                                    </Col>
+                                    <Col xs={12} sm={6} md={3} className="mb-3 mb-md-0">
+                                        <Form.Label className="agreement-filter-title">Filtrar por responsable</Form.Label>
+                                        <Form.Control
+                                            type="text"
+                                            placeholder="Nombre del responsable..."
+                                            value={responsibleFilter}
+                                            onChange={(e) => setResponsibleFilter(e.target.value)}
+                                            className="filter-field w-100"
+                                        />
+                                    </Col>
+                                    <Col xs={12} sm={6} md={3} className="mb-3 mb-md-0">
+                                        <Form.Label className="agreement-filter-title">Rango de fechas</Form.Label>
+                                        <div className="d-flex gap-2">
+                                            <Form.Control
+                                                type="date"
+                                                value={dateRangeFilter.from}
+                                                onChange={(e) => setDateRangeFilter(prev => ({ ...prev, from: e.target.value }))}
+                                                className="date-filter-black filter-field w-100"
+                                            />
+                                            <Form.Control
+                                                type="date"
+                                                value={dateRangeFilter.to}
+                                                onChange={(e) => setDateRangeFilter(prev => ({ ...prev, to: e.target.value }))}
+                                                className="date-filter-black filter-field w-100"
+                                            />
+                                        </div>
+                                    </Col>
+                                </Row>
                             </div>
                         </div>
                         <div className="search-filter mt-3">
@@ -855,8 +852,14 @@ const Agreements = () => {
                                 placeholder="Buscar por título o descripción..."
                                 value={searchFilter}
                                 onChange={(e) => setSearchFilter(e.target.value)}
-                                className="filter-field"
+                                className="filter-field w-100"
                             />
+                        </div>
+                        <div className="d-flex justify-content-end mt-3">
+                            <Button variant="success" className="report-button" onClick={handleExportAllAgreementsExcel}>
+                                <i className="fas fa-file-excel me-2"></i>
+                                Generar Excel
+                            </Button>
                         </div>
                     </div>
                     <Row>
