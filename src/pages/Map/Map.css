@@ -1,6 +1,10 @@
 .container-fluid {
     min-height: 100vh;
     padding-bottom: 2rem;
+    background: #fff;
+    width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 .map-wrapper {
@@ -10,11 +14,11 @@
     height: 100vh;
     display: flex;
     flex-direction: column;
-    padding: 2.5rem 1.5rem 0 1.5rem;
+    padding: 0.5rem 1.5rem 0 1.5rem;
     box-sizing: border-box;
     background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    border-radius: 0;
+    box-shadow: none;
 }
 
 .map-container {
@@ -429,6 +433,8 @@
     color: #2d3748;
     background-color: rgba(255, 255, 255, 0.95);
     transition: all 0.2s ease;
+    height: 38px;
+    box-sizing: border-box;
 }
 
 .filter-input:focus {
@@ -1062,6 +1068,8 @@
     background: #fff;
     color: #212529;
     transition: border 0.2s, box-shadow 0.2s;
+    height: 38px;
+    box-sizing: border-box;
 }
 
 .incident-type-input:focus,
@@ -1083,6 +1091,7 @@
 .incident-details textarea {
     min-height: 60px;
     resize: vertical;
+    height: auto;
 }
 
 .incident-actions {
@@ -1160,7 +1169,7 @@
     color: #212529;
     margin: 0;
     box-sizing: border-box;
-    height: 2rem;
+    height: 38px;
 }
 
 .incident-panel-filters input[type="date"]::placeholder,
@@ -1194,7 +1203,7 @@
     background: #f8f9fa;
     color: #212529;
     box-sizing: border-box;
-    height: 2rem;
+    height: 38px;
 }
 
 .modal-overlay {
@@ -1288,6 +1297,7 @@
     margin: 0;
     box-sizing: border-box;
     transition: border 0.2s, box-shadow 0.2s;
+    height: 38px;
 }
 
 .modal-form select:focus,
@@ -1301,6 +1311,7 @@
 .modal-form textarea {
     min-height: 60px;
     resize: vertical;
+    height: auto;
 }
 
 .modal-form-actions {
@@ -1808,12 +1819,16 @@
         margin-bottom: 8px;
         max-height: 280px;
         overflow-y: auto;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .map-filters-compact>div {
         display: flex;
         flex-direction: column;
         gap: 4px;
+        width: 100%;
+        min-width: 0;
     }
 
     .filter-label {
@@ -1828,6 +1843,10 @@
         padding: 6px 8px;
         height: 32px;
         background-color: rgba(255, 255, 255, 0.95);
+        color: #1e293b !important;
+        -webkit-text-fill-color: #1e293b !important;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .map-filters-compact input[type="date"] {
@@ -1835,6 +1854,10 @@
         padding: 6px 8px;
         height: 32px;
         background-color: rgba(255, 255, 255, 0.95);
+        color: #1e293b !important;
+        -webkit-text-fill-color: #1e293b !important;
+        width: 100%;
+        box-sizing: border-box;
     }
 }
 

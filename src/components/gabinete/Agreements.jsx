@@ -32,6 +32,10 @@ const Agreements = () => {
     const [editCommentText, setEditCommentText] = useState({});
     const [showAllAgreements, setShowAllAgreements] = useState(false);
     const [allStatusFilter, setAllStatusFilter] = useState('');
+    const [searchFilter, setSearchFilter] = useState('');
+    const [dateRangeFilter, setDateRangeFilter] = useState({ from: '', to: '' });
+    const [responsibleFilter, setResponsibleFilter] = useState('');
+    const [sortOrder, setSortOrder] = useState('newest');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [validationErrors, setValidationErrors] = useState({});
 
@@ -144,8 +148,22 @@ const Agreements = () => {
     // Todos los acuerdos (ordenados y filtrados por estado si aplica)
     const allAgreementsFiltered = agreements
         .slice()
-        .sort((a, b) => new Date(b.date) - new Date(a.date))
-        .filter(agreement => !allStatusFilter || agreement.status === allStatusFilter);
+        .filter(agreement => {
+            const matchesStatus = !allStatusFilter || agreement.status === allStatusFilter;
+            const matchesSearch = !searchFilter ||
+                agreement.title.toLowerCase().includes(searchFilter.toLowerCase()) ||
+                agreement.description.toLowerCase().includes(searchFilter.toLowerCase());
+            const matchesDate = (!dateRangeFilter.from || new Date(agreement.date) >= new Date(dateRangeFilter.from)) &&
+                (!dateRangeFilter.to || new Date(agreement.date) <= new Date(dateRangeFilter.to));
+            const matchesResponsible = !responsibleFilter ||
+                agreement.responsible.toLowerCase().includes(responsibleFilter.toLowerCase());
+            return matchesStatus && matchesSearch && matchesDate && matchesResponsible;
+        })
+        .sort((a, b) => {
+            const dateA = new Date(a.date);
+            const dateB = new Date(b.date);
+            return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+        });
 
     if (loadingAgreements) {
         return <div className="text-center p-4">Cargando acuerdos...</div>;
@@ -248,14 +266,16 @@ const Agreements = () => {
             return;
         }
         const data = [
-            ['Fecha', 'Título', 'Estado', 'Descripción']
+            ['Fecha', 'Título', 'Estado', 'Descripción', 'Responsable', 'Fecha de entrega']
         ];
         allAgreementsFiltered.forEach(agreement => {
             data.push([
                 agreement.date ? new Date(agreement.date).toLocaleDateString('es-MX') : '',
                 agreement.title || '',
                 agreement.status || '',
-                agreement.description || ''
+                agreement.description || '',
+                agreement.responsible || '',
+                agreement.dueDate ? new Date(agreement.dueDate).toLocaleDateString('es-MX') : ''
             ]);
         });
         const ws = XLSX.utils.aoa_to_sheet(data);
@@ -754,26 +774,89 @@ const Agreements = () => {
                             Ocultar todos los acuerdos
                         </Button>
                     </div>
-                    <div className="all-agreements-filters mb-3">
-                        <div style={{ maxWidth: 320 }}>
-                            <Form.Label>Filtrar por estado</Form.Label>
-                            <Form.Select
-                                value={allStatusFilter}
-                                onChange={e => setAllStatusFilter(e.target.value)}
-                            >
-                                <option value="">Todos los estados</option>
-                                <option value="pendiente">Pendiente</option>
-                                <option value="en_progreso">En progreso</option>
-                                <option value="completado">Completado</option>
-                                <option value="cancelado">Cancelado</option>
-                                <option value="informacion">Información</option>
-                            </Form.Select>
+                    <div className="all-agreements-filters mb-3 styled-filters">
+                        <div className="filters-row d-flex flex-wrap align-items-end gap-3">
+                            <div style={{ minWidth: 150 }}>
+                                <Form.Label className="agreement-filter-title">Filtrar por estado</Form.Label>
+                                <Form.Select
+                                    value={allStatusFilter}
+                                    onChange={e => setAllStatusFilter(e.target.value)}
+                                    className="filter-field"
+                                >
+                                    <option value="">Todos los estados</option>
+                                    <option value="pendiente">Pendiente</option>
+                                    <option value="en_progreso">En progreso</option>
+                                    <option value="completado">Completado</option>
+                                    <option value="cancelado">Cancelado</option>
+                                    <option value="informacion">Información</option>
+                                </Form.Select>
+                            </div>
+                            <div style={{ minWidth: 150 }}>
+                                <Form.Label className="agreement-filter-title">Ordenar por fecha</Form.Label>
+                                <div className="d-flex gap-2">
+                                    <Button
+                                        variant={sortOrder === 'newest' ? 'primary' : 'outline-primary'}
+                                        size="sm"
+                                        onClick={() => setSortOrder('newest')}
+                                        className="w-100"
+                                    >
+                                        <i className="fas fa-arrow-down me-1"></i>
+                                        Recientes
+                                    </Button>
+                                    <Button
+                                        variant={sortOrder === 'oldest' ? 'primary' : 'outline-primary'}
+                                        size="sm"
+                                        onClick={() => setSortOrder('oldest')}
+                                        className="w-100"
+                                    >
+                                        <i className="fas fa-arrow-up me-1"></i>
+                                        Antiguos
+                                    </Button>
+                                </div>
+                            </div>
+                            <div style={{ minWidth: 150 }}>
+                                <Form.Label className="agreement-filter-title">Filtrar por responsable</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Nombre del responsable..."
+                                    value={responsibleFilter}
+                                    onChange={(e) => setResponsibleFilter(e.target.value)}
+                                    className="filter-field"
+                                />
+                            </div>
+                            <div style={{ minWidth: 180 }}>
+                                <Form.Label className="agreement-filter-title">Rango de fechas</Form.Label>
+                                <div className="d-flex gap-2">
+                                    <Form.Control
+                                        type="date"
+                                        value={dateRangeFilter.from}
+                                        onChange={(e) => setDateRangeFilter(prev => ({ ...prev, from: e.target.value }))}
+                                        className="date-filter-black filter-field"
+                                    />
+                                    <Form.Control
+                                        type="date"
+                                        value={dateRangeFilter.to}
+                                        onChange={(e) => setDateRangeFilter(prev => ({ ...prev, to: e.target.value }))}
+                                        className="date-filter-black filter-field"
+                                    />
+                                </div>
+                            </div>
+                            <div className="ms-auto d-flex flex-column align-items-end" style={{ minWidth: 180 }}>
+                                <Form.Label className="agreement-filter-title" style={{ visibility: 'hidden' }}>Generar Excel</Form.Label>
+                                <Button variant="success" className="report-button" onClick={handleExportAllAgreementsExcel}>
+                                    <i className="fas fa-file-excel me-2"></i>
+                                    Generar Excel
+                                </Button>
+                            </div>
                         </div>
-                        <div>
-                            <Button variant="success" className="report-button" onClick={handleExportAllAgreementsExcel}>
-                                <i className="fas fa-file-excel me-2"></i>
-                                Generar reporte Excel
-                            </Button>
+                        <div className="search-filter mt-3">
+                            <Form.Control
+                                type="text"
+                                placeholder="Buscar por título o descripción..."
+                                value={searchFilter}
+                                onChange={(e) => setSearchFilter(e.target.value)}
+                                className="filter-field"
+                            />
                         </div>
                     </div>
                     <Row>

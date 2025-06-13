@@ -795,104 +795,6 @@ const Map = ({ onQuadrantClick }) => {
     return (
         <div className="container-fluid">
             <div className="map-wrapper">
-                {/* Información de rango de fechas */}
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    gap: '0.25rem',
-                    marginBottom: '0.25rem',
-                    padding: '0.15rem',
-                    flexWrap: 'wrap'
-                }}>
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.35rem',
-                        background: 'linear-gradient(to right, #f8fafc, #f1f5f9)',
-                        padding: '0.25rem 0.5rem',
-                        borderRadius: '6px',
-                        border: '1px solid #e2e8f0',
-                        boxShadow: '0 1px 1px rgba(0,0,0,0.05)',
-                        transition: 'all 0.2s ease'
-                    }}>
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '20px',
-                            height: '20px',
-                            borderRadius: '4px',
-                            background: '#2563eb',
-                            color: 'white',
-                            fontSize: '0.7rem'
-                        }}>
-                            <i className="fas fa-calendar-alt"></i>
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.05rem' }}>
-                            <span style={{
-                                fontSize: '0.7rem',
-                                fontWeight: '600',
-                                color: '#475569',
-                                letterSpacing: '0.025em'
-                            }}>
-                                Últimos 30 días
-                            </span>
-                            {dateRangeInfo.start && dateRangeInfo.end && (
-                                <span style={{
-                                    fontSize: '0.7rem',
-                                    color: '#1e293b',
-                                    fontWeight: '500'
-                                }}>
-                                    {dateRangeInfo.start.toLocaleDateString()} - {dateRangeInfo.end.toLocaleDateString()}
-                                </span>
-                            )}
-                        </div>
-                    </div>
-
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.35rem',
-                        background: 'linear-gradient(to right, #f8fafc, #f1f5f9)',
-                        padding: '0.25rem 0.5rem',
-                        borderRadius: '6px',
-                        border: '1px solid #e2e8f0',
-                        boxShadow: '0 1px 1px rgba(0,0,0,0.05)',
-                        transition: 'all 0.2s ease'
-                    }}>
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '20px',
-                            height: '20px',
-                            borderRadius: '4px',
-                            background: '#2563eb',
-                            color: 'white',
-                            fontSize: '0.7rem'
-                        }}>
-                            <i className="fas fa-database"></i>
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.05rem' }}>
-                            <span style={{
-                                fontSize: '0.7rem',
-                                fontWeight: '600',
-                                color: '#475569',
-                                letterSpacing: '0.025em'
-                            }}>
-                                Datos disponibles desde
-                            </span>
-                            <span style={{
-                                fontSize: '0.7rem',
-                                color: '#1e293b',
-                                fontWeight: '500'
-                            }}>
-                                {dateRangeInfo.oldestAvailable ? dateRangeInfo.oldestAvailable.toLocaleDateString() : 'Cargando...'}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
                 {/* Filtros */}
                 <div className="map-filters map-filters-compact">
                     <div>
@@ -1103,6 +1005,87 @@ const Map = ({ onQuadrantClick }) => {
                                 <div className="legend-item">
                                     <div className="legend-color" style={{ backgroundColor: '#ffbb33' }}></div>
                                     <span>Bajo Impacto</span>
+                                </div>
+                                <div style={{
+                                    marginTop: '0.75rem',
+                                    paddingTop: '0.75rem',
+                                    width: '100%'
+                                }}>
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.5rem',
+                                        marginBottom: '0.5rem'
+                                    }}>
+                                        <div style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            width: '20px',
+                                            height: '20px',
+                                            borderRadius: '4px',
+                                            background: '#2563eb',
+                                            color: 'white',
+                                            fontSize: '0.7rem'
+                                        }}>
+                                            <i className="fas fa-calendar-alt"></i>
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
+                                            <span style={{
+                                                fontSize: '0.8rem',
+                                                fontWeight: '600',
+                                                color: '#475569',
+                                                letterSpacing: '0.025em'
+                                            }}>
+                                                Últimos 30 días
+                                            </span>
+                                            {dateRangeInfo.start && dateRangeInfo.end && (
+                                                <span style={{
+                                                    fontSize: '0.75rem',
+                                                    color: '#1e293b',
+                                                    fontWeight: '500'
+                                                }}>
+                                                    {dateRangeInfo.start.toLocaleDateString()} - {dateRangeInfo.end.toLocaleDateString()}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.5rem'
+                                    }}>
+                                        <div style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            width: '20px',
+                                            height: '20px',
+                                            borderRadius: '4px',
+                                            background: '#2563eb',
+                                            color: 'white',
+                                            fontSize: '0.7rem'
+                                        }}>
+                                            <i className="fas fa-database"></i>
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
+                                            <span style={{
+                                                fontSize: '0.8rem',
+                                                fontWeight: '600',
+                                                color: '#475569',
+                                                letterSpacing: '0.025em'
+                                            }}>
+                                                Datos disponibles desde
+                                            </span>
+                                            <span style={{
+                                                fontSize: '0.75rem',
+                                                color: '#1e293b',
+                                                fontWeight: '500'
+                                            }}>
+                                                {dateRangeInfo.oldestAvailable ? dateRangeInfo.oldestAvailable.toLocaleDateString() : 'Cargando...'}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
                             </>
                         )}
