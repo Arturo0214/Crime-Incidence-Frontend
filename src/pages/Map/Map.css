@@ -451,24 +451,35 @@
 /* Forzar estilos claros en los filtros de fecha del panel de filtros */
 .map-filters input[type="date"] {
     background: #fff !important;
-    color: #222 !important;
+    color: #1e293b !important;
+    -webkit-text-fill-color: #1e293b !important;
     border: 1px solid #ced4da !important;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    font-size: 0.875rem;
+    font-family: inherit;
+    line-height: 1.5;
+    padding: 0.4rem 0.5rem;
 }
 
-.map-filters input[type="date"]::-webkit-input-placeholder {
-    color: #222 !important;
+.map-filters input[type="date"]::-webkit-datetime-edit,
+.map-filters input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+.map-filters input[type="date"]::-webkit-datetime-edit-text,
+.map-filters input[type="date"]::-webkit-datetime-edit-month-field,
+.map-filters input[type="date"]::-webkit-datetime-edit-day-field,
+.map-filters input[type="date"]::-webkit-datetime-edit-year-field {
+    color: #1e293b !important;
+    -webkit-text-fill-color: #1e293b !important;
+    font-size: 0.875rem;
+    font-family: inherit;
+    line-height: 1.5;
 }
 
-.map-filters input[type="date"]::placeholder {
-    color: #222 !important;
-}
-
-/* Icono de calendario negro en navegadores Webkit */
 .map-filters input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(0%) !important;
 }
 
-/* Icono de calendario negro en Firefox */
 .map-filters input[type="date"]::-moz-calendar-picker-indicator {
     filter: invert(0%) !important;
 }
@@ -487,30 +498,26 @@
         width: 100%;
     }
 
-    .filter-input {
+    .map-filters input[type="date"] {
+        width: 100%;
+        min-width: 0;
         font-size: 16px;
-        /* Previene zoom en iOS */
         padding: 10px 12px;
         color: #1e293b !important;
         -webkit-text-fill-color: #1e293b !important;
-    }
-
-    .map-filters-compact input[type="date"] {
-        width: 100%;
-        min-width: 0;
-        color: #1e293b !important;
-        -webkit-text-fill-color: #1e293b !important;
         background: #fff !important;
+        box-sizing: border-box;
     }
 
-    .map-filters-compact input[type="date"]::-webkit-datetime-edit,
-    .map-filters-compact input[type="date"]::-webkit-datetime-edit-fields-wrapper,
-    .map-filters-compact input[type="date"]::-webkit-datetime-edit-text,
-    .map-filters-compact input[type="date"]::-webkit-datetime-edit-month-field,
-    .map-filters-compact input[type="date"]::-webkit-datetime-edit-day-field,
-    .map-filters-compact input[type="date"]::-webkit-datetime-edit-year-field {
+    .map-filters input[type="date"]::-webkit-datetime-edit,
+    .map-filters input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+    .map-filters input[type="date"]::-webkit-datetime-edit-text,
+    .map-filters input[type="date"]::-webkit-datetime-edit-month-field,
+    .map-filters input[type="date"]::-webkit-datetime-edit-day-field,
+    .map-filters input[type="date"]::-webkit-datetime-edit-year-field {
         color: #1e293b !important;
         -webkit-text-fill-color: #1e293b !important;
+        font-size: 16px;
     }
 }
 
