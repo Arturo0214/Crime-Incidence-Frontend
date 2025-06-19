@@ -44,10 +44,16 @@ export const createAgreement = async (data) => {
 
 export const updateAgreement = async (id, data) => {
     try {
+        const token = localStorage.getItem('token');
+        console.log('Token en updateAgreement:', token ? 'Existe' : 'No existe');
+        console.log('Token completo:', token);
+
         const response = await axiosInstance.put(`/agreements/${id}`, data);
         return response.data;
     } catch (error) {
         console.error('Error al actualizar acuerdo:', error);
+        console.error('Error response:', error.response?.data);
+        console.error('Error status:', error.response?.status);
         throw error;
     }
 };

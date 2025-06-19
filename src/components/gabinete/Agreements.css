@@ -1063,3 +1063,55 @@ input[type="date"]:-webkit-autofill {
         margin-bottom: 0.18rem;
     }
 }
+
+.agreement-filter-title {
+    color: #64748b;
+    font-weight: 500;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Estilos para las etiquetas de estado seleccionadas */
+.selected-statuses {
+    margin-top: 0.5rem;
+}
+
+.status-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+}
+
+.status-tag {
+    display: inline-flex;
+    align-items: center;
+    background: #3b82f6;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.status-tag:hover {
+    background: #2563eb;
+}
+
+.status-tag i {
+    font-size: 0.7rem;
+    margin-left: 0.25rem;
+}
+
+@media (max-width: 768px) {
+    .status-tags {
+        gap: 0.25rem;
+    }
+
+    .status-tag {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.4rem;
+    }
+}

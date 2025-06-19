@@ -31,7 +31,7 @@ const Agreements = () => {
     const [editingComment, setEditingComment] = useState({});
     const [editCommentText, setEditCommentText] = useState({});
     const [showAllAgreements, setShowAllAgreements] = useState(false);
-    const [allStatusFilter, setAllStatusFilter] = useState('');
+    const [allStatusFilter, setAllStatusFilter] = useState([]);
     const [searchFilter, setSearchFilter] = useState('');
     const [dateRangeFilter, setDateRangeFilter] = useState({ from: '', to: '' });
     const [responsibleFilter, setResponsibleFilter] = useState('');
@@ -41,11 +41,10 @@ const Agreements = () => {
 
     useEffect(() => {
         if (!hasFetchedRef.current) {
-            console.log('Initial fetch of agreements');
             dispatch(fetchAgreements())
                 .unwrap()
                 .then(() => {
-                    console.log('Agreements fetched successfully');
+                    // Agreements fetched successfully
                 })
                 .catch((error) => {
                     console.error('Error fetching agreements:', error);
@@ -149,14 +148,55 @@ const Agreements = () => {
     const allAgreementsFiltered = agreements
         .slice()
         .filter(agreement => {
-            const matchesStatus = !allStatusFilter || agreement.status === allStatusFilter;
-            const matchesSearch = !searchFilter ||
-                agreement.title.toLowerCase().includes(searchFilter.toLowerCase()) ||
-                agreement.description.toLowerCase().includes(searchFilter.toLowerCase());
+            const matchesStatus = allStatusFilter.length === 0 || allStatusFilter.includes(agreement.status);
+
+            // Lógica mejorada para el filtro de búsqueda
+            let matchesSearch = !searchFilter;
+            if (searchFilter) {
+                const searchLower = searchFilter.toLowerCase();
+                const titleMatch = agreement.title.toLowerCase().includes(searchLower);
+                const descriptionMatch = agreement.description.toLowerCase().includes(searchLower);
+                const dueDateMatch = agreement.dueDate && new Date(agreement.dueDate).toLocaleDateString('es-MX').toLowerCase().includes(searchLower);
+
+                // Lógica especial para responsables
+                let responsibleMatch = false;
+                if (agreement.responsible) {
+                    const responsibleLower = agreement.responsible.toLowerCase();
+
+                    // Si buscas "Todos", incluir todos los acuerdos
+                    if (searchLower === 'todos') {
+                        responsibleMatch = true;
+                    }
+                    // Si el responsable del acuerdo es "Todos", siempre incluir (sin importar qué busques)
+                    else if (responsibleLower === 'todos') {
+                        responsibleMatch = true;
+                    }
+                    // Si buscas un responsable específico, incluir si coincide exactamente
+                    else if (responsibleLower.includes(searchLower)) {
+                        responsibleMatch = true;
+                    }
+                }
+
+                matchesSearch = titleMatch || descriptionMatch || responsibleMatch || dueDateMatch;
+
+                // Debug temporal para verificar el filtro
+                if (searchFilter.toLowerCase() === 'rjdg' && agreement.responsible) {
+                    console.log('🔍 Evaluando acuerdo:', {
+                        title: agreement.title,
+                        responsible: agreement.responsible,
+                        responsibleLower: agreement.responsible.toLowerCase(),
+                        searchLower: searchLower,
+                        responsibleMatch: responsibleMatch,
+                        matchesSearch: matchesSearch
+                    });
+                }
+            }
+
             const matchesDate = (!dateRangeFilter.from || new Date(agreement.date) >= new Date(dateRangeFilter.from)) &&
                 (!dateRangeFilter.to || new Date(agreement.date) <= new Date(dateRangeFilter.to));
             const matchesResponsible = !responsibleFilter ||
-                agreement.responsible.toLowerCase().includes(responsibleFilter.toLowerCase());
+                (agreement.responsible && agreement.responsible.toLowerCase().includes(responsibleFilter.toLowerCase()));
+
             return matchesStatus && matchesSearch && matchesDate && matchesResponsible;
         })
         .sort((a, b) => {
@@ -215,7 +255,7 @@ const Agreements = () => {
             await dispatch(addComment({ agreementId, comment: newComment })).unwrap();
             setCommentText(t => ({ ...t, [agreementId]: '' }));
         } catch (error) {
-            console.error('Error al agregar comentario:', error);
+            // Error adding comment
         }
     };
 
@@ -225,7 +265,7 @@ const Agreements = () => {
             setEditingComment(ec => ({ ...ec, [agreementId]: undefined }));
             setEditCommentText(et => ({ ...et, [agreementId]: '' }));
         } catch (error) {
-            console.error('Error al editar comentario:', error);
+            // Error editing comment
         }
     };
 
@@ -233,7 +273,7 @@ const Agreements = () => {
         try {
             await dispatch(deleteComment({ agreementId, commentId })).unwrap();
         } catch (error) {
-            console.error('Error al eliminar comentario:', error);
+            // Error deleting comment
         }
     };
 
@@ -266,23 +306,56 @@ const Agreements = () => {
             return;
         }
         const data = [
-            ['Fecha', 'Título', 'Estado', 'Descripción', 'Responsable', 'Fecha de entrega']
+            ['Fecha', 'Título', 'Estado', 'Descripción', 'Responsable', 'Fecha de entrega', 'Seguimiento']
         ];
         allAgreementsFiltered.forEach(agreement => {
+            // Formatear comentarios para la columna de seguimiento
+            let seguimiento = '';
+            if (agreement.comments && agreement.comments.length > 0) {
+                seguimiento = agreement.comments.map(comment => {
+                    const fecha = comment.date ? new Date(comment.date).toLocaleDateString('es-MX') : 'Sin fecha';
+                    return `${fecha} - ${comment.author}: ${comment.text}`;
+                }).join('\n');
+            }
+
             data.push([
                 agreement.date ? new Date(agreement.date).toLocaleDateString('es-MX') : '',
                 agreement.title || '',
                 agreement.status || '',
                 agreement.description || '',
                 agreement.responsible || '',
-                agreement.dueDate ? new Date(agreement.dueDate).toLocaleDateString('es-MX') : ''
+                agreement.dueDate ? new Date(agreement.dueDate).toLocaleDateString('es-MX') : '',
+                seguimiento
             ]);
         });
         const ws = XLSX.utils.aoa_to_sheet(data);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'Acuerdos');
-        const estado = allStatusFilter ? allStatusFilter : 'todos';
-        const fileName = `Reporte_Acuerdos_${estado}_${new Date().toISOString().split('T')[0]}.xlsx`;
+
+        // Crear nombre de archivo más descriptivo
+        let fileName = 'Reporte_Acuerdos';
+
+        // Agregar filtros aplicados al nombre del archivo
+        if (allStatusFilter.length > 0) {
+            fileName += `_Estados_${allStatusFilter.join('_')}`;
+        }
+
+        if (searchFilter) {
+            fileName += `_Busqueda_${searchFilter.replace(/[^a-zA-Z0-9]/g, '_')}`;
+        }
+
+        if (responsibleFilter) {
+            fileName += `_Responsable_${responsibleFilter.replace(/[^a-zA-Z0-9]/g, '_')}`;
+        }
+
+        if (dateRangeFilter.from || dateRangeFilter.to) {
+            const fromDate = dateRangeFilter.from ? new Date(dateRangeFilter.from).toISOString().split('T')[0] : 'inicio';
+            const toDate = dateRangeFilter.to ? new Date(dateRangeFilter.to).toISOString().split('T')[0] : 'fin';
+            fileName += `_Fecha_${fromDate}_a_${toDate}`;
+        }
+
+        fileName += `_${new Date().toISOString().split('T')[0]}.xlsx`;
+
         XLSX.writeFile(wb, fileName);
     };
 
@@ -619,7 +692,9 @@ const Agreements = () => {
                                                             <Form.Control
                                                                 type="text"
                                                                 value={editAgreementForm.responsible || ''}
-                                                                onChange={e => setEditAgreementForm(f => ({ ...f, responsible: e.target.value }))}
+                                                                onChange={e => {
+                                                                    setEditAgreementForm(f => ({ ...f, responsible: e.target.value }));
+                                                                }}
                                                                 required
                                                             />
                                                         </Form.Group>
@@ -680,11 +755,11 @@ const Agreements = () => {
                                                             <Button size="sm" variant="outline-primary" onClick={() => {
                                                                 setEditingAgreementId(agreement._id);
                                                                 setEditAgreementForm({
-                                                                    title: agreement.title,
-                                                                    description: agreement.description,
+                                                                    title: agreement.title || '',
+                                                                    description: agreement.description || '',
                                                                     date: agreement.date ? new Date(agreement.date).toISOString().slice(0, 10) : '',
-                                                                    status: agreement.status,
-                                                                    responsible: agreement.responsible,
+                                                                    status: agreement.status || 'pendiente',
+                                                                    responsible: agreement.responsible || '',
                                                                     dueDate: agreement.dueDate ? new Date(agreement.dueDate).toISOString().slice(0, 10) : ''
                                                                 });
                                                             }}>Editar</Button>
@@ -781,8 +856,17 @@ const Agreements = () => {
                                     <Col xs={12} sm={6} md={3} className="mb-3 mb-md-0">
                                         <Form.Label className="agreement-filter-title">Filtrar por estado</Form.Label>
                                         <Form.Select
-                                            value={allStatusFilter}
-                                            onChange={e => setAllStatusFilter(e.target.value)}
+                                            value={allStatusFilter.length > 0 ? allStatusFilter[0] : ''}
+                                            onChange={(e) => {
+                                                const selectedValue = e.target.value;
+                                                if (selectedValue === '') {
+                                                    setAllStatusFilter([]);
+                                                } else if (allStatusFilter.includes(selectedValue)) {
+                                                    setAllStatusFilter(prev => prev.filter(s => s !== selectedValue));
+                                                } else {
+                                                    setAllStatusFilter(prev => [...prev, selectedValue]);
+                                                }
+                                            }}
                                             className="filter-field w-100"
                                         >
                                             <option value="">Todos los estados</option>
@@ -792,6 +876,27 @@ const Agreements = () => {
                                             <option value="cancelado">Cancelado</option>
                                             <option value="informacion">Información</option>
                                         </Form.Select>
+                                        {allStatusFilter.length > 0 && (
+                                            <div className="selected-statuses mt-2">
+                                                <small className="text-muted">Estados seleccionados:</small>
+                                                <div className="status-tags">
+                                                    {allStatusFilter.map(status => (
+                                                        <span
+                                                            key={status}
+                                                            className="status-tag"
+                                                            onClick={() => setAllStatusFilter(prev => prev.filter(s => s !== status))}
+                                                        >
+                                                            {status === 'completado' ? 'Completado' :
+                                                                status === 'en_progreso' ? 'En progreso' :
+                                                                    status === 'cancelado' ? 'Cancelado' :
+                                                                        status === 'informacion' ? 'Información' :
+                                                                            'Pendiente'}
+                                                            <i className="fas fa-times ms-1"></i>
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                     </Col>
                                     <Col xs={12} sm={6} md={3} className="mb-3 mb-md-0">
                                         <Form.Label className="agreement-filter-title">Ordenar por fecha</Form.Label>
@@ -849,13 +954,13 @@ const Agreements = () => {
                         <div className="search-filter mt-3">
                             <Form.Control
                                 type="text"
-                                placeholder="Buscar por título o descripción..."
+                                placeholder="Buscar por título, descripción, responsable o fecha de entrega..."
                                 value={searchFilter}
                                 onChange={(e) => setSearchFilter(e.target.value)}
                                 className="filter-field w-100"
                             />
                         </div>
-                        <div className="d-flex justify-content-end mt-3">
+                        <div className="d-flex justify-content-center mt-3">
                             <Button variant="success" className="report-button" onClick={handleExportAllAgreementsExcel}>
                                 <i className="fas fa-file-excel me-2"></i>
                                 Generar Excel
@@ -929,7 +1034,9 @@ const Agreements = () => {
                                                                 <Form.Control
                                                                     type="text"
                                                                     value={editAgreementForm.responsible || ''}
-                                                                    onChange={e => setEditAgreementForm(f => ({ ...f, responsible: e.target.value }))}
+                                                                    onChange={e => {
+                                                                        setEditAgreementForm(f => ({ ...f, responsible: e.target.value }));
+                                                                    }}
                                                                     required
                                                                 />
                                                             </Form.Group>
@@ -990,11 +1097,11 @@ const Agreements = () => {
                                                                 <Button size="sm" variant="outline-primary" onClick={() => {
                                                                     setEditingAgreementId(agreement._id);
                                                                     setEditAgreementForm({
-                                                                        title: agreement.title,
-                                                                        description: agreement.description,
+                                                                        title: agreement.title || '',
+                                                                        description: agreement.description || '',
                                                                         date: agreement.date ? new Date(agreement.date).toISOString().slice(0, 10) : '',
-                                                                        status: agreement.status,
-                                                                        responsible: agreement.responsible,
+                                                                        status: agreement.status || 'pendiente',
+                                                                        responsible: agreement.responsible || '',
                                                                         dueDate: agreement.dueDate ? new Date(agreement.dueDate).toISOString().slice(0, 10) : ''
                                                                     });
                                                                 }}>Editar</Button>

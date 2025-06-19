@@ -18,6 +18,7 @@ import { Bar, Line } from 'react-chartjs-2';
 import { FaChartBar, FaExclamationTriangle } from 'react-icons/fa';
 import * as turf from '@turf/turf';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import * as XLSX from 'xlsx';
 
 // Registrar componentes de Chart.js
 ChartJS.register(
@@ -81,7 +82,18 @@ const DELITOS_BAJO_IMPACTO = [
 ];
 
 const quadrantColors = [
-    '#2563eb', '#f59e0b', '#ef4444', '#10b981', '#a21caf', '#f43f5e', '#0ea5e9', '#eab308', '#6366f1', '#14b8a6', '#f97316', '#84cc16'
+    '#1f77b4', // Azul oscuro
+    '#ff7f0e', // Naranja
+    '#2ca02c', // Verde
+    '#d62728', // Rojo
+    '#9467bd', // Púrpura
+    '#8c564b', // Marrón
+    '#e377c2', // Rosa
+    '#7f7f7f', // Gris
+    '#bcbd22', // Verde oliva
+    '#17becf', // Cian
+    '#ff9896', // Rosa claro
+    '#98df8a'  // Verde claro
 ];
 
 const Statistics = () => {
@@ -95,12 +107,20 @@ const Statistics = () => {
         impact: 'all',
         status: 'all'
     });
+    const [quadrantFilters, setQuadrantFilters] = useState({
+        from: '',
+        to: '',
+        type: 'all',
+        impact: 'all',
+        status: 'all'
+    });
     const [groupBy, setGroupBy] = useState('dia'); // 'dia', 'semana', 'mes'
     const [quadrantsGeoJSON, setQuadrantsGeoJSON] = useState(null);
     const [impactFilter, setImpactFilter] = useState('all'); // 'all', 'ALTO', 'BAJO'
     const [selectedQuadrant, setSelectedQuadrant] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [delitoTipo, setDelitoTipo] = useState('all');
+    const [quadrantDelitoTipo, setQuadrantDelitoTipo] = useState('all');
     const [visibleQuadrants, setVisibleQuadrants] = useState(Array(12).fill(true));
     const [visibleQuadrantsBar, setVisibleQuadrantsBar] = useState(Array(12).fill(true));
     const [isMobile, setIsMobile] = useState(false);
@@ -114,14 +134,14 @@ const Statistics = () => {
         const fetchStats = async () => {
             try {
                 const data = await getIncidents();
-                // Ordenar incidentes por fecha
+                // Ordenar incidentes por fecha (exactamente igual que Map.jsx)
                 const sortedIncidents = data.data.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-                // Encontrar la fecha más antigua y más reciente
+                // Encontrar la fecha más antigua y más reciente (sin ajuste de zona horaria, igual que Map.jsx)
                 const oldestDate = new Date(Math.min(...sortedIncidents.map(inc => new Date(inc.date))));
                 const newestDate = new Date(Math.max(...sortedIncidents.map(inc => new Date(inc.date))));
 
-                // Calcular la fecha de inicio para los últimos 30 días
+                // Calcular la fecha de inicio para los últimos 30 días (igual que Map.jsx)
                 const thirtyDaysAgo = new Date(newestDate);
                 thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -160,10 +180,11 @@ const Statistics = () => {
     }, []);
 
     // --- Funciones utilitarias ---
-    // Ajuste de fecha igual que en Map.jsx: ahora suma 6 horas
+    // Función para obtener fecha en zona horaria local con ajuste de zona horaria (igual que Map.jsx)
     function getAdjustedDate(dateInput) {
         const d = new Date(dateInput);
-        d.setHours(d.getHours() + 12);
+        // Aplicar el mismo ajuste de zona horaria que en Map.jsx (-6 horas)
+        d.setHours(d.getHours() - 6);
         return d;
     }
     // Función para obtener fecha local en formato YYYY-MM-DD
@@ -192,6 +213,26 @@ const Statistics = () => {
         const yearStart = new Date(d.getFullYear(), 0, 1);
         return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
     }
+
+    // Función auxiliar para verificar si un incidente está en el rango de fechas (igual que Map.jsx)
+    const isIncidentInRange = (incidentDate, fromDate, toDate) => {
+        const date = new Date(incidentDate);
+        date.setHours(date.getHours() - 6); // Mismo ajuste que Map.jsx
+
+        if (fromDate) {
+            const from = new Date(fromDate);
+            from.setHours(0, 0, 0, 0);
+            if (date < from) return false;
+        }
+
+        if (toDate) {
+            const to = new Date(toDate);
+            to.setHours(23, 59, 59, 999);
+            if (date > to) return false;
+        }
+
+        return true;
+    };
 
     // Agrupar por día y por impacto para barras apiladas
     const groupByDayImpact = (incidents) => {
@@ -235,6 +276,60 @@ const Statistics = () => {
         return map;
     };
 
+    // Agrupar por período para gráficas generales
+    const groupByPeriod = (incidents, period) => {
+        const map = {};
+        incidents.forEach(i => {
+            let key = '';
+            if (!i.date) {
+                key = 'Sin fecha';
+            } else {
+                const date = getAdjustedDate(i.date);
+                if (isNaN(date.getTime())) {
+                    key = 'Sin fecha';
+                } else if (period === 'dia') {
+                    key = getLocalDateString(date);
+                } else if (period === 'semana') {
+                    const year = date.getFullYear();
+                    const week = getWeekNumberLocal(date);
+                    key = `${year}-W${week.toString().padStart(2, '0')}`;
+                } else if (period === 'mes') {
+                    key = getLocalMonthString(date);
+                }
+            }
+            map[key] = (map[key] || 0) + 1;
+        });
+        return map;
+    };
+
+    // Agrupar por período e impacto para gráficas generales
+    const groupByPeriodImpact = (incidents, period) => {
+        const map = {};
+        incidents.forEach(i => {
+            let key = '';
+            if (!i.date) {
+                key = 'Sin fecha';
+            } else {
+                const date = getAdjustedDate(i.date);
+                if (isNaN(date.getTime())) {
+                    key = 'Sin fecha';
+                } else if (period === 'dia') {
+                    key = getLocalDateString(date);
+                } else if (period === 'semana') {
+                    const year = date.getFullYear();
+                    const week = getWeekNumberLocal(date);
+                    key = `${year}-W${week.toString().padStart(2, '0')}`;
+                } else if (period === 'mes') {
+                    key = getLocalMonthString(date);
+                }
+            }
+            if (!map[key]) map[key] = { ALTO: 0, BAJO: 0 };
+            if (i.crimeImpact === 'ALTO') map[key].ALTO++;
+            else if (i.crimeImpact === 'BAJO') map[key].BAJO++;
+        });
+        return map;
+    };
+
     // Procesar incidentes para asegurar que todos tengan cuadrante usando turf y el GeoJSON
     const processedIncidents = (stats?.incidents || []).map(i => {
         let lat, lng;
@@ -268,18 +363,17 @@ const Statistics = () => {
         }
     });
 
-    // Filtrado normal para todas las gráficas
+    // Filtrado normal para las primeras 2 gráficas (Incidentes por Día y Tendencia Semanal)
     const filtered = processedIncidents.filter(i => {
         let pass = true;
-        if (filters.from) {
-            const fromDate = new Date(filters.from);
-            pass = pass && new Date(i.date) >= fromDate;
+
+        // Filtro por rango de fechas usando la función auxiliar
+        if (filters.from || filters.to) {
+            if (!isIncidentInRange(i.date, filters.from, filters.to)) {
+                return false;
+            }
         }
-        if (filters.to) {
-            const toDate = new Date(filters.to);
-            toDate.setDate(toDate.getDate() + 1);
-            pass = pass && new Date(i.date) < toDate;
-        }
+
         if (filters.type !== 'all') {
             pass = pass && i.type === filters.type;
         }
@@ -295,7 +389,7 @@ const Statistics = () => {
 
         // Si no hay filtros de fecha específicos, mostrar solo los últimos 30 días
         if (!filters.from && !filters.to) {
-            const incidentDate = new Date(i.date);
+            const incidentDate = new Date(i.date); // Sin ajuste de zona horaria, igual que Map.jsx
             const thirtyDaysAgo = new Date(dateRangeInfo.end);
             thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
             if (incidentDate < thirtyDaysAgo) return false;
@@ -304,32 +398,38 @@ const Statistics = () => {
         return pass;
     });
 
-    // Para la gráfica de cuadrantes, solo incidentes con cuadrante válido (como número)
-    const filteredQuadrant = processedIncidents.filter(i => {
+    // Filtrado para las gráficas de cuadrantes usando quadrantFilters
+    const filteredForQuadrants = processedIncidents.filter(i => {
         let pass = true;
-        if (!Number.isInteger(i.quadrant) || i.quadrant < 1 || i.quadrant > 12) return false;
-        if (impactFilter !== 'all' && i.crimeImpact !== impactFilter) pass = false;
-        if (filters.from) {
-            const fromDate = new Date(filters.from);
-            pass = pass && new Date(i.date) >= fromDate;
+
+        // Filtro por rango de fechas usando la función auxiliar
+        if (quadrantFilters.from || quadrantFilters.to) {
+            if (!isIncidentInRange(i.date, quadrantFilters.from, quadrantFilters.to)) {
+                return false;
+            }
         }
-        if (filters.to) {
-            const toDate = new Date(filters.to);
-            toDate.setDate(toDate.getDate() + 1);
-            pass = pass && new Date(i.date) < toDate;
+
+        if (quadrantFilters.type !== 'all') {
+            pass = pass && i.type === quadrantFilters.type;
         }
-        if (filters.type !== 'all') {
-            pass = pass && i.type === filters.type;
+        if (quadrantFilters.impact !== 'all') {
+            pass = pass && i.crimeImpact === quadrantFilters.impact;
         }
-        if (filters.impact !== 'all') {
-            pass = pass && i.crimeImpact === filters.impact;
+        if (quadrantFilters.status !== 'all') {
+            pass = pass && i.status === quadrantFilters.status;
         }
-        if (filters.status !== 'all') {
-            pass = pass && i.status === filters.status;
+        if (quadrantDelitoTipo !== 'all') {
+            pass = pass && i.crimeType === quadrantDelitoTipo;
         }
-        if (delitoTipo !== 'all') {
-            pass = pass && i.crimeType === delitoTipo;
+
+        // Si no hay filtros de fecha específicos, mostrar solo los últimos 30 días
+        if (!quadrantFilters.from && !quadrantFilters.to) {
+            const incidentDate = new Date(i.date); // Sin ajuste de zona horaria, igual que Map.jsx
+            const thirtyDaysAgo = new Date(dateRangeInfo.end);
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            if (incidentDate < thirtyDaysAgo) return false;
         }
+
         return pass;
     });
 
@@ -338,12 +438,16 @@ const Statistics = () => {
     const dayMap = groupByDay(filtered);
     const impactMap = groupByImpact(filtered);
 
+    // Agrupar por período para gráficas generales
+    const periodMap = groupByPeriod(filtered, groupBy);
+    const periodImpactMap = groupByPeriodImpact(filtered, groupBy);
+
     // --- Generar labels de fechas completas para el rango seleccionado ---
     let minDate = null, maxDate = null;
     const allFiltered = [...filtered];
     if (allFiltered.length > 0) {
-        minDate = allFiltered.reduce((min, i) => new Date(i.date) < new Date(min.date) ? i : min).date;
-        maxDate = allFiltered.reduce((max, i) => new Date(i.date) > new Date(max.date) ? i : max).date;
+        minDate = allFiltered.reduce((min, i) => getAdjustedDate(i.date) < getAdjustedDate(min.date) ? i : min).date;
+        maxDate = allFiltered.reduce((max, i) => getAdjustedDate(i.date) > getAdjustedDate(max.date) ? i : max).date;
     }
     const rangeFrom = minDate ? getLocalDateString(minDate) : null;
     const rangeTo = maxDate ? getLocalDateString(maxDate) : null;
@@ -351,13 +455,29 @@ const Statistics = () => {
     if (rangeFrom && rangeTo) {
         dayLabels = getDateRangeArray(rangeFrom, rangeTo);
     }
-    let quadrantDayLabels = dayLabels;
+
+    // --- Generar labels de fechas para cuadrantes basados en filteredForQuadrants ---
+    let quadrantMinDate = null, quadrantMaxDate = null;
+    const allFilteredQuadrants = [...filteredForQuadrants];
+    if (allFilteredQuadrants.length > 0) {
+        quadrantMinDate = allFilteredQuadrants.reduce((min, i) => getAdjustedDate(i.date) < getAdjustedDate(min.date) ? i : min).date;
+        quadrantMaxDate = allFilteredQuadrants.reduce((max, i) => getAdjustedDate(i.date) > getAdjustedDate(max.date) ? i : max).date;
+    }
+    const quadrantRangeFrom = quadrantMinDate ? getLocalDateString(quadrantMinDate) : null;
+    const quadrantRangeTo = quadrantMaxDate ? getLocalDateString(quadrantMaxDate) : null;
+    let quadrantDayLabels = [];
+    if (quadrantRangeFrom && quadrantRangeTo) {
+        quadrantDayLabels = getDateRangeArray(quadrantRangeFrom, quadrantRangeTo);
+    }
 
     const allQuadrants = Array.from({ length: 12 }, (_, i) => i + 1);
-    const allPeriods = delitoTipo !== 'all' ? getAllPeriods(filteredQuadrant, groupBy) : getAllPeriods(filtered, groupBy);
+    const allPeriods = delitoTipo !== 'all' ? getAllPeriods(filtered, groupBy) : getAllPeriods(filtered, groupBy);
+    const allPeriodsQuadrants = quadrantDelitoTipo !== 'all' ? getAllPeriods(filteredForQuadrants, groupBy) : getAllPeriods(filteredForQuadrants, groupBy);
     let periodLabels = allPeriods;
+    let periodLabelsQuadrants = allPeriodsQuadrants;
+
     if (groupBy === 'dia' && filters.from && filters.to) {
-        periodLabels = delitoTipo !== 'all' ? quadrantDayLabels : dayLabels;
+        periodLabels = delitoTipo !== 'all' ? dayLabels : dayLabels;
     } else if (groupBy === 'semana') {
         periodLabels = allPeriods.map(w => {
             if (/^\d{4}-W\d{2}$/.test(w)) {
@@ -366,39 +486,70 @@ const Statistics = () => {
             }
             return w;
         });
+    } else if (groupBy === 'dia' && (filters.from || filters.to)) {
+        // Si solo hay un filtro de fecha (from o to), usar el rango de fechas de los datos filtrados
+        periodLabels = dayLabels;
+    }
+
+    if (groupBy === 'dia' && quadrantFilters.from && quadrantFilters.to) {
+        periodLabelsQuadrants = quadrantDelitoTipo !== 'all' ? quadrantDayLabels : quadrantDayLabels;
+    } else if (groupBy === 'semana') {
+        periodLabelsQuadrants = allPeriodsQuadrants.map(w => {
+            if (/^\d{4}-W\d{2}$/.test(w)) {
+                const [year, weekStr] = w.split('-W');
+                return getWeekDateRange(Number(year), Number(weekStr));
+            }
+            return w;
+        });
+    } else if (groupBy === 'dia' && (quadrantFilters.from || quadrantFilters.to)) {
+        // Si solo hay un filtro de fecha (from o to), usar el rango de fechas de los datos filtrados
+        periodLabelsQuadrants = quadrantDayLabels;
     }
 
     // --- Responsive: solo mostrar la última semana en móviles (<=600px) ---
     let dayLabelsToShow = dayLabels;
     let quadrantDayLabelsToShow = quadrantDayLabels;
     let periodLabelsToShow = periodLabels;
+    let periodLabelsQuadrantsToShow = periodLabelsQuadrants;
     let allPeriodsToShow = allPeriods;
+    let allPeriodsQuadrantsToShow = allPeriodsQuadrants;
 
     if (isMobile && dayLabels.length > 7) {
         dayLabelsToShow = dayLabels.slice(-7);
+    }
+    if (isMobile && quadrantDayLabels.length > 7) {
         quadrantDayLabelsToShow = quadrantDayLabels.slice(-7);
     }
     if (isMobile && periodLabels.length > 7 && groupBy === 'dia') {
         periodLabelsToShow = periodLabels.slice(-7);
         allPeriodsToShow = allPeriods.slice(-7);
     }
+    if (isMobile && periodLabelsQuadrants.length > 7 && groupBy === 'dia') {
+        periodLabelsQuadrantsToShow = periodLabelsQuadrants.slice(-7);
+        allPeriodsQuadrantsToShow = allPeriodsQuadrants.slice(-7);
+    }
 
     // Gráfica de barras: incidentes por día (solo cuadrantes válidos)
     const dayAltoData = dayLabelsToShow.map(label => dayImpactMap[label]?.ALTO || 0);
     const dayBajoData = dayLabelsToShow.map(label => dayImpactMap[label]?.BAJO || 0);
 
+    // Datos por período para gráficas generales
+    const periodAltoData = periodLabelsToShow.map(label => periodImpactMap[label]?.ALTO || 0);
+    const periodBajoData = periodLabelsToShow.map(label => periodImpactMap[label]?.BAJO || 0);
+    const periodData = periodLabelsToShow.map(label => periodMap[label] || 0);
+
     const barData = {
-        labels: dayLabelsToShow,
+        labels: groupBy === 'dia' ? dayLabelsToShow : periodLabelsToShow,
         datasets: [
             {
                 label: 'Alto Impacto',
-                data: dayAltoData,
+                data: groupBy === 'dia' ? dayAltoData : periodAltoData,
                 backgroundColor: '#F44336',
                 stack: 'impact',
             },
             {
                 label: 'Bajo Impacto',
-                data: dayBajoData,
+                data: groupBy === 'dia' ? dayBajoData : periodBajoData,
                 backgroundColor: '#FFC107',
                 stack: 'impact',
             },
@@ -413,11 +564,11 @@ const Statistics = () => {
     // --- Tendencia diaria (linea) ---
     const dayData = dayLabelsToShow.map(label => dayMap[label] || 0);
     const lineData = {
-        labels: dayLabelsToShow,
+        labels: groupBy === 'dia' ? dayLabelsToShow : periodLabelsToShow,
         datasets: [
             {
-                label: 'Tendencia Semanal',
-                data: dayData,
+                label: groupBy === 'dia' ? 'Tendencia Diaria' : groupBy === 'semana' ? 'Tendencia Semanal' : 'Tendencia Mensual',
+                data: groupBy === 'dia' ? dayData : periodData,
                 borderColor: '#2563eb',
                 backgroundColor: 'rgba(37,99,235,0.1)',
                 tension: 0.3,
@@ -439,13 +590,13 @@ const Statistics = () => {
                 if (isNaN(date.getTime())) {
                     key = 'Sin fecha';
                 } else if (period === 'dia') {
-                    key = getLocalDateString(date); // LOCAL
+                    key = getLocalDateString(date);
                 } else if (period === 'semana') {
                     const year = date.getFullYear();
                     const week = getWeekNumberLocal(date);
                     key = `${year}-W${week.toString().padStart(2, '0')}`;
                 } else if (period === 'mes') {
-                    key = getLocalMonthString(date); // LOCAL
+                    key = getLocalMonthString(date);
                 }
             }
             if (!map[i.quadrant]) map[i.quadrant] = {};
@@ -470,7 +621,7 @@ const Statistics = () => {
         } else if (period === 'mes') {
             getKey = d => d ? getLocalMonthString(d) : 'Sin fecha';
         }
-        const dates = incidents.map(i => i.date ? new Date(i.date) : null).filter(d => d === null || !isNaN(d.getTime())).sort((a, b) => {
+        const dates = incidents.map(i => i.date ? getAdjustedDate(i.date) : null).filter(d => d === null || !isNaN(d.getTime())).sort((a, b) => {
             if (a === null) return 1;
             if (b === null) return -1;
             return a - b;
@@ -494,7 +645,7 @@ const Statistics = () => {
         return Array.from(new Set(all));
     }
 
-    const periodQuadrantMap = groupByPeriodQuadrant(filteredQuadrant, groupBy);
+    const periodQuadrantMap = groupByPeriodQuadrant(filteredForQuadrants, groupBy);
 
     // --- Utilidad para obtener el rango de fechas de una semana ---
     function getWeekDateRange(year, week) {
@@ -516,12 +667,12 @@ const Statistics = () => {
 
     // --- Para la gráfica de líneas de cuadrantes, también usar periodLabels ---
     const periodQuadrantLineData = {
-        labels: groupBy === 'dia' ? quadrantDayLabelsToShow : periodLabelsToShow,
+        labels: groupBy === 'dia' ? quadrantDayLabelsToShow : periodLabelsQuadrantsToShow,
         datasets: allQuadrants.map((q, idx) => ({
             label: `Cuadrante ${q}`,
-            data: (groupBy === 'dia' ? quadrantDayLabelsToShow : periodLabelsToShow).map((m, i) => {
-                // Para semana, usar el valor original de allPeriods
-                const periodKey = groupBy === 'semana' ? allPeriodsToShow[i] : m;
+            data: (groupBy === 'dia' ? quadrantDayLabelsToShow : periodLabelsQuadrantsToShow).map((m, i) => {
+                // Para semana, usar el valor original de allPeriodsQuadrants
+                const periodKey = groupBy === 'semana' ? allPeriodsQuadrantsToShow[i] : m;
                 return periodQuadrantMap[q]?.[periodKey] || 0;
             }),
             borderColor: quadrantColors[idx % quadrantColors.length],
@@ -594,7 +745,7 @@ const Statistics = () => {
                     color: '#1e293b'
                 }}>
                     <span style={{ fontWeight: '600' }}>Últimos 30 días:</span>
-                    <span>{dateRangeInfo.start?.toLocaleDateString()} - {dateRangeInfo.end?.toLocaleDateString()}</span>
+                    <span>{dateRangeInfo.start?.toLocaleDateString('es-MX')} - {dateRangeInfo.end?.toLocaleDateString('es-MX')}</span>
                 </div>
                 <div style={{
                     display: 'flex',
@@ -608,53 +759,72 @@ const Statistics = () => {
                     color: '#1e293b'
                 }}>
                     <span style={{ fontWeight: '600' }}>Datos disponibles desde:</span>
-                    <span>{dateRangeInfo.oldestAvailable?.toLocaleDateString()}</span>
+                    <span>{dateRangeInfo.oldestAvailable?.toLocaleDateString('es-MX')}</span>
                 </div>
             </div>
 
             {/* Filtros globales */}
-            <div className={isMobile ? "stats-filters-mobile" : "stats-filters"}>
-                <div className="stats-filter-item-mobile">
-                    <label>Desde</label>
-                    <input type="date" className="date-filter-black stats-date-input form-control" value={filters.from} onChange={e => setFilters(f => ({ ...f, from: e.target.value }))} />
-                </div>
-                <div className="stats-filter-item-mobile">
-                    <label>Hasta</label>
-                    <input type="date" className="date-filter-black stats-date-input form-control" value={filters.to} onChange={e => setFilters(f => ({ ...f, to: e.target.value }))} />
-                </div>
-                <div className="stats-filter-item-mobile">
-                    <label>Impacto</label>
-                    <select className="form-control" value={filters.impact} onChange={e => setFilters(f => ({ ...f, impact: e.target.value }))}>
-                        <option value="all">Todos</option>
-                        {IMPACT_TYPES.map(type => (
-                            <option key={type} value={type}>{type}</option>
-                        ))}
-                    </select>
-                </div>
-                <div className="stats-filter-item-mobile">
-                    <label>Estado</label>
-                    <select className="form-control" value={filters.status} onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}>
-                        <option value="all">Todos</option>
-                        {STATUS_TYPES.map(type => (
-                            <option key={type} value={type}>{type}</option>
-                        ))}
-                    </select>
-                </div>
-                <div className="stats-filter-item-mobile">
-                    <label>Tipo de delito</label>
-                    <select className="form-control" value={delitoTipo} onChange={e => setDelitoTipo(e.target.value)}>
-                        <option value="all">Todos</option>
-                        <optgroup label="Alto Impacto">
-                            {DELITOS_ALTO_IMPACTO.map(tipo => (
-                                <option key={tipo} value={tipo}>{tipo}</option>
+            <div style={{
+                background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+                borderRadius: '16px',
+                padding: '2rem',
+                margin: '2rem 0',
+                border: '1px solid #e2e8f0',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+            }}>
+                <h3 style={{
+                    textAlign: 'center',
+                    marginBottom: '1.5rem',
+                    color: '#174ea6',
+                    fontWeight: '700',
+                    fontSize: '1.5rem',
+                    fontFamily: 'Inter, Poppins, Segoe UI, Arial, sans-serif'
+                }}>
+                    Filtros para Gráficas Generales
+                </h3>
+                <div className={isMobile ? "stats-filters-mobile" : "stats-filters"}>
+                    <div className="stats-filter-item-mobile">
+                        <label>Desde</label>
+                        <input type="date" className="date-filter-black stats-date-input form-control" value={filters.from} onChange={e => setFilters(f => ({ ...f, from: e.target.value }))} />
+                    </div>
+                    <div className="stats-filter-item-mobile">
+                        <label>Hasta</label>
+                        <input type="date" className="date-filter-black stats-date-input form-control" value={filters.to} onChange={e => setFilters(f => ({ ...f, to: e.target.value }))} />
+                    </div>
+                    <div className="stats-filter-item-mobile">
+                        <label>Impacto</label>
+                        <select className="form-control" value={filters.impact} onChange={e => setFilters(f => ({ ...f, impact: e.target.value }))}>
+                            <option value="all">Todos</option>
+                            {IMPACT_TYPES.map(type => (
+                                <option key={type} value={type}>{type}</option>
                             ))}
-                        </optgroup>
-                        <optgroup label="Bajo Impacto">
-                            {DELITOS_BAJO_IMPACTO.map(tipo => (
-                                <option key={tipo} value={tipo}>{tipo}</option>
+                        </select>
+                    </div>
+                    <div className="stats-filter-item-mobile">
+                        <label>Estado</label>
+                        <select className="form-control" value={filters.status} onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}>
+                            <option value="all">Todos</option>
+                            {STATUS_TYPES.map(type => (
+                                <option key={type} value={type}>{type}</option>
                             ))}
-                        </optgroup>
-                    </select>
+                        </select>
+                    </div>
+                    <div className="stats-filter-item-mobile">
+                        <label>Tipo de delito</label>
+                        <select className="form-control" value={delitoTipo} onChange={e => setDelitoTipo(e.target.value)}>
+                            <option value="all">Todos</option>
+                            <optgroup label="Alto Impacto">
+                                {DELITOS_ALTO_IMPACTO.map(tipo => (
+                                    <option key={tipo} value={tipo}>{tipo}</option>
+                                ))}
+                            </optgroup>
+                            <optgroup label="Bajo Impacto">
+                                {DELITOS_BAJO_IMPACTO.map(tipo => (
+                                    <option key={tipo} value={tipo}>{tipo}</option>
+                                ))}
+                            </optgroup>
+                        </select>
+                    </div>
                 </div>
             </div>
             {/* Tarjetas de resumen */}
@@ -677,7 +847,9 @@ const Statistics = () => {
                 <div className="col-md-6 mb-4">
                     <div className="card h-100">
                         <div className="card-body">
-                            <h5 className="card-title">Incidentes por Día</h5>
+                            <h5 className="card-title">
+                                {groupBy === 'dia' ? 'Incidentes por Día' : groupBy === 'semana' ? 'Incidentes por Semana' : 'Incidentes por Mes'}
+                            </h5>
                             <Bar data={barData} options={{
                                 responsive: true,
                                 plugins: {
@@ -698,7 +870,9 @@ const Statistics = () => {
                 <div className="col-md-6 mb-4">
                     <div className="card h-100">
                         <div className="card-body">
-                            <h5 className="card-title">Tendencia Semanal</h5>
+                            <h5 className="card-title">
+                                {groupBy === 'dia' ? 'Tendencia Diaria' : groupBy === 'semana' ? 'Tendencia Semanal' : 'Tendencia Mensual'}
+                            </h5>
                             <Line data={lineData} options={{
                                 responsive: true,
                                 plugins: {
@@ -720,13 +894,87 @@ const Statistics = () => {
                 </div>
             </div>
 
-            <div className="row mb-4">
-                <div className="col-12">
-                    <div className="card h-100" style={{ boxShadow: '0 4px 24px rgba(37,99,235,0.08)', borderRadius: 18, border: '1.5px solid #e0e8f0', background: '#fff' }}>
-                        {/* Título destacado */}
+            {/* Segunda sección de filtros para análisis de cuadrantes */}
+            <div style={{
+                background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+                borderRadius: '16px',
+                padding: '2rem',
+                margin: '2rem 0',
+                border: '1px solid #e2e8f0',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+            }}>
+                <h3 style={{
+                    textAlign: 'center',
+                    marginBottom: '1.5rem',
+                    color: '#174ea6',
+                    fontWeight: '700',
+                    fontSize: '1.5rem',
+                    fontFamily: 'Inter, Poppins, Segoe UI, Arial, sans-serif'
+                }}>
+                    Filtros para Análisis de Cuadrantes
+                </h3>
+                <div className={isMobile ? "stats-filters-mobile" : "stats-filters"}>
+                    <div className="stats-filter-item-mobile">
+                        <label>Desde</label>
+                        <input type="date" className="date-filter-black stats-date-input form-control" value={quadrantFilters.from} onChange={e => setQuadrantFilters(f => ({ ...f, from: e.target.value }))} />
+                    </div>
+                    <div className="stats-filter-item-mobile">
+                        <label>Hasta</label>
+                        <input type="date" className="date-filter-black stats-date-input form-control" value={quadrantFilters.to} onChange={e => setQuadrantFilters(f => ({ ...f, to: e.target.value }))} />
+                    </div>
+                    <div className="stats-filter-item-mobile">
+                        <label>Impacto</label>
+                        <select className="form-control" value={quadrantFilters.impact} onChange={e => setQuadrantFilters(f => ({ ...f, impact: e.target.value }))}>
+                            <option value="all">Todos</option>
+                            {IMPACT_TYPES.map(type => (
+                                <option key={type} value={type}>{type}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="stats-filter-item-mobile">
+                        <label>Estado</label>
+                        <select className="form-control" value={quadrantFilters.status} onChange={e => setQuadrantFilters(f => ({ ...f, status: e.target.value }))}>
+                            <option value="all">Todos</option>
+                            {STATUS_TYPES.map(type => (
+                                <option key={type} value={type}>{type}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="stats-filter-item-mobile">
+                        <label>Tipo de delito</label>
+                        <select className="form-control" value={quadrantDelitoTipo} onChange={e => setQuadrantDelitoTipo(e.target.value)}>
+                            <option value="all">Todos</option>
+                            <optgroup label="Alto Impacto">
+                                {DELITOS_ALTO_IMPACTO.map(tipo => (
+                                    <option key={tipo} value={tipo}>{tipo}</option>
+                                ))}
+                            </optgroup>
+                            <optgroup label="Bajo Impacto">
+                                {DELITOS_BAJO_IMPACTO.map(tipo => (
+                                    <option key={tipo} value={tipo}>{tipo}</option>
+                                ))}
+                            </optgroup>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div className="row mb-4 analysis-section">
+                <div className="col-12 mb-4 analysis-chart-row">
+                    <div className="card h-100" style={{
+                        minHeight: 600,
+                        boxShadow: '0 8px 32px rgba(44,62,80,0.13)',
+                        borderRadius: 22,
+                        border: '1.5px solid #e0e8f0',
+                        background: '#fff'
+                    }}>
+                        {/* Título estético */}
                         <div style={{
                             textAlign: 'center',
-                            margin: '2.2rem 0 1.2rem 0',
+                            paddingLeft: '3rem',
+                            paddingRight: '3rem',
+                            paddingTop: '2.5rem',
+                            marginBottom: '2rem',
                             fontFamily: 'Inter, Poppins, Segoe UI, Arial, sans-serif'
                         }}>
                             <h3 style={{
@@ -847,9 +1095,9 @@ const Statistics = () => {
                                                 label: `Cuadrante ${q}`,
                                                 data: (groupBy === 'dia' ? quadrantDayLabelsToShow : periodLabelsToShow).map((periodLabel, i) => {
                                                     // Filtrar por impacto y periodo
-                                                    // Para semana, usar el valor original de allPeriods
+                                                    // Para semana, usar el valor original de allPeriodsQuadrants
                                                     const periodKey = groupBy === 'semana' ? allPeriodsToShow[i] : periodLabel;
-                                                    return filteredQuadrant.filter(i => {
+                                                    return filteredForQuadrants.filter(i => {
                                                         if (i.quadrant !== q) return false;
                                                         if (impactFilter !== 'all' && i.crimeImpact !== impactFilter) return false;
                                                         // Homologar periodo
@@ -1112,7 +1360,7 @@ const Statistics = () => {
                             </div>
                             <div className="quadrant-summary-grid">
                                 {allQuadrants.map((quadrant) => {
-                                    const quadrantIncidents = filteredQuadrant.filter(i => i.quadrant === quadrant);
+                                    const quadrantIncidents = filteredForQuadrants.filter(i => i.quadrant === quadrant);
                                     const altoImpact = quadrantIncidents.filter(i => i.crimeImpact === 'ALTO').length;
                                     const bajoImpact = quadrantIncidents.filter(i => i.crimeImpact === 'BAJO').length;
                                     const totalIncidents = altoImpact + bajoImpact;
@@ -1164,23 +1412,167 @@ const Statistics = () => {
                         {showModal && (
                             <div className="quadrant-modal-overlay">
                                 <div className="quadrant-modal">
-                                    <button
-                                        className="quadrant-modal-close"
-                                        onClick={() => setShowModal(false)}
-                                    >
-                                        ×
-                                    </button>
-                                    <h3 className="quadrant-modal-title">
-                                        Detalles del Cuadrante {selectedQuadrant}
-                                    </h3>
-                                    <div>
-                                        {filteredQuadrant
+                                    {/* Header fijo */}
+                                    <div style={{
+                                        position: 'sticky',
+                                        top: 0,
+                                        background: '#fff',
+                                        borderBottom: '1px solid #e5e7eb',
+                                        padding: '1.5rem 2rem 1rem 2rem',
+                                        zIndex: 10,
+                                        borderRadius: '12px 12px 0 0'
+                                    }}>
+                                        <div style={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            marginBottom: '1rem'
+                                        }}>
+                                            <h3 style={{
+                                                margin: 0,
+                                                color: '#174ea6',
+                                                fontWeight: '700',
+                                                fontSize: '1.5rem',
+                                                fontFamily: 'Inter, Poppins, Segoe UI, Arial, sans-serif'
+                                            }}>
+                                                Detalles del Cuadrante {selectedQuadrant}
+                                            </h3>
+                                            <button
+                                                onClick={() => setShowModal(false)}
+                                                style={{
+                                                    background: 'none',
+                                                    border: 'none',
+                                                    fontSize: '2rem',
+                                                    color: '#6b7280',
+                                                    cursor: 'pointer',
+                                                    padding: '0.5rem',
+                                                    borderRadius: '50%',
+                                                    width: '40px',
+                                                    height: '40px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    transition: 'all 0.2s ease',
+                                                    ':hover': {
+                                                        background: '#f3f4f6',
+                                                        color: '#374151'
+                                                    }
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    e.target.style.background = '#f3f4f6';
+                                                    e.target.style.color = '#374151';
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.target.style.background = 'none';
+                                                    e.target.style.color = '#6b7280';
+                                                }}
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+
+                                        {/* Botón de exportar a Excel */}
+                                        <div style={{
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            marginTop: '0.5rem'
+                                        }}>
+                                            <button
+                                                onClick={() => {
+                                                    const quadrantIncidents = filteredForQuadrants.filter(i => i.quadrant === selectedQuadrant);
+                                                    if (quadrantIncidents.length === 0) {
+                                                        alert('No hay incidentes para exportar en este cuadrante con los filtros aplicados.');
+                                                        return;
+                                                    }
+
+                                                    // Preparar datos para Excel
+                                                    const excelData = quadrantIncidents.map(incident => ({
+                                                        'Cuadrante': selectedQuadrant,
+                                                        'Tipo de Incidente': incident.type === 'Crimen' ? 'Delito' : incident.type,
+                                                        'Tipo de Delito': incident.crimeType || 'N/A',
+                                                        'Descripción': incident.description || 'N/A',
+                                                        'Impacto': incident.crimeImpact || 'N/A',
+                                                        'Estado': incident.status || 'N/A',
+                                                        'Fecha': new Date(incident.date).toLocaleDateString('es-MX'),
+                                                        'Hora': new Date(incident.date).toLocaleTimeString('es-MX'),
+                                                        'Dirección': incident.address || 'N/A',
+                                                        'Latitud': incident.location?.coordinates?.[1] || incident.location?.lat || 'N/A',
+                                                        'Longitud': incident.location?.coordinates?.[0] || incident.location?.lng || 'N/A'
+                                                    }));
+
+                                                    // Crear archivo Excel con formato
+                                                    const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+                                                    // Configurar anchos de columna
+                                                    const columnWidths = [
+                                                        { wch: 10 }, // Cuadrante
+                                                        { wch: 20 }, // Tipo de Incidente
+                                                        { wch: 25 }, // Tipo de Delito
+                                                        { wch: 40 }, // Descripción
+                                                        { wch: 12 }, // Impacto
+                                                        { wch: 15 }, // Estado
+                                                        { wch: 12 }, // Fecha
+                                                        { wch: 10 }, // Hora
+                                                        { wch: 35 }, // Dirección
+                                                        { wch: 12 }, // Latitud
+                                                        { wch: 12 }  // Longitud
+                                                    ];
+                                                    worksheet['!cols'] = columnWidths;
+
+                                                    // Crear workbook
+                                                    const workbook = XLSX.utils.book_new();
+
+                                                    // Agregar hoja con nombre descriptivo
+                                                    XLSX.utils.book_append_sheet(workbook, worksheet, `Cuadrante_${selectedQuadrant}`);
+
+                                                    // Generar y descargar archivo
+                                                    const fileName = `incidentes_cuadrante_${selectedQuadrant}_${new Date().toISOString().split('T')[0]}.xlsx`;
+                                                    XLSX.writeFile(workbook, fileName);
+                                                }}
+                                                style={{
+                                                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    padding: '0.75rem 1.5rem',
+                                                    borderRadius: '8px',
+                                                    fontSize: '0.9rem',
+                                                    fontWeight: '600',
+                                                    cursor: 'pointer',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.5rem',
+                                                    transition: 'all 0.2s ease',
+                                                    boxShadow: '0 2px 4px rgba(16, 185, 129, 0.2)',
+                                                    fontFamily: 'Inter, Poppins, Segoe UI, Arial, sans-serif'
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    e.target.style.transform = 'translateY(-1px)';
+                                                    e.target.style.boxShadow = '0 4px 8px rgba(16, 185, 129, 0.3)';
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.target.style.transform = 'translateY(0)';
+                                                    e.target.style.boxShadow = '0 2px 4px rgba(16, 185, 129, 0.2)';
+                                                }}
+                                            >
+                                                📊 Generar Reporte XLSX
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Contenido scrolleable */}
+                                    <div style={{
+                                        padding: '1rem 2rem 2rem 2rem',
+                                        maxHeight: '60vh',
+                                        overflowY: 'auto',
+                                        borderRadius: '0 0 12px 12px'
+                                    }}>
+                                        {filteredForQuadrants
                                             .filter(i => i.quadrant === selectedQuadrant)
                                             .map((incident, idx) => (
                                                 <div key={idx} className="incident-card">
                                                     <div className="incident-header">
                                                         <h4 className="incident-type">
-                                                            {incident.type}
+                                                            {incident.type === 'Crimen' ? 'Delito' : incident.type}
                                                         </h4>
                                                         <span className={`incident-impact ${incident.crimeImpact === 'ALTO' ? 'high' : 'low'}`}>
                                                             {incident.crimeImpact}
@@ -1206,4 +1598,4 @@ const Statistics = () => {
     );
 };
 
-export default Statistics; 
+export default Statistics;

@@ -141,9 +141,10 @@ const agreementsSlice = createSlice({
             })
             // Edit Agreement
             .addCase(editAgreement.fulfilled, (state, action) => {
-                const agreement = state.agreements.find(a => a._id === action.payload._id);
-                if (agreement) {
-                    agreement.comments = action.payload.comments;
+                const index = state.agreements.findIndex(a => a._id === action.payload._id);
+                if (index !== -1) {
+                    // Actualizar todos los campos del acuerdo con los datos devueltos por el backend
+                    state.agreements[index] = action.payload;
                 }
             })
             // Remove Agreement

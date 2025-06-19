@@ -242,76 +242,61 @@ const Attendance = () => {
                 summary[part.id] = {
                     name: part.name,
                     week: { titular: 0, suplente: 0, ausente: 0 },
-                    month: { titular: 0, suplente: 0, ausente: 0 }
+                    total: { titular: 0, suplente: 0, ausente: 0 }  // Cambiado de month a total para claridad
                 };
             });
-            // Calcular semana y mes del rango
-            const weekStart = new Date(reportStartDate);
-            weekStart.setHours(0, 0, 0, 0);
-            const weekEnd = new Date(reportEndDate);
-            weekEnd.setHours(23, 59, 59, 999);
-            // Semana
+
+            // Calcular totales para todo el rango
             filteredAttendance.forEach(a => {
-                const attendanceLocalDate = getLocalDateOnly(a.date);
-                if (attendanceLocalDate >= weekStart && attendanceLocalDate <= weekEnd) {
-                    a.participants.forEach(p => {
-                        const id = String(p.participantId._id || p.participantId);
-                        if (summary[id]) {
-                            summary[id].week[p.attendance]++;
-                        }
-                    });
-                }
+                a.participants.forEach(p => {
+                    const id = String(p.participantId._id || p.participantId);
+                    if (summary[id]) {
+                        summary[id].total[p.attendance]++;
+                    }
+                });
             });
-            // Mes
-            filteredAttendance.forEach(a => {
-                const d = new Date(a.date);
-                if (
-                    d.getFullYear() === weekStart.getFullYear() &&
-                    d.getMonth() === weekStart.getMonth()
-                ) {
-                    a.participants.forEach(p => {
-                        const id = String(p.participantId._id || p.participantId);
-                        if (summary[id]) {
-                            summary[id].month[p.attendance]++;
-                        }
-                    });
-                }
-            });
+
             // Preparar datos para Excel
             const reportData = [];
             reportData.push([
                 'Dependencia',
-                'Semana Titular', 'Semana Suplente', 'Semana Ausente',
-                'Mes Titular', 'Mes Suplente', 'Mes Ausente',
-                'Asistencia Total'
+                'Asistencias Titular',
+                'Asistencias Suplente',
+                'Ausencias',
+                'Total de Registros',
+                'Resumen'
             ]);
+
             participants.forEach(part => {
                 const s = summary[part.id];
-                const totalMonth = s.month.titular + s.month.suplente + s.month.ausente;
-                const asistenciasTitular = s.month.titular;
-                const asistenciasSuplente = s.month.suplente;
-                const ausencias = s.month.ausente;
-                const totalAsistencias = asistenciasTitular + asistenciasSuplente;
+                const totalRegistros = s.total.titular + s.total.suplente + s.total.ausente;
+                const totalAsistencias = s.total.titular + s.total.suplente;
+
                 let resumenText = '';
-                if (totalMonth > 0) {
-                    resumenText = `${totalAsistencias}/${totalMonth} asistencias`;
-                    if (asistenciasTitular > 0) resumenText += ` Titular: ${asistenciasTitular}`;
-                    if (asistenciasSuplente > 0) resumenText += ` Suplente: ${asistenciasSuplente}`;
-                    if (ausencias > 0) resumenText += ` Ausencias: ${ausencias}`;
+                if (totalRegistros > 0) {
+                    resumenText = `${totalAsistencias}/${totalRegistros} asistencias totales`;
+                    if (s.total.titular > 0) resumenText += ` (${s.total.titular} titular`;
+                    if (s.total.suplente > 0) resumenText += s.total.titular > 0 ? `, ${s.total.suplente} suplente)` : ` (${s.total.suplente} suplente)`;
+                    if (s.total.ausente > 0) resumenText += ` | ${s.total.ausente} ausencias`;
                 } else {
                     resumenText = 'Sin registros';
                 }
+
                 reportData.push([
                     s.name,
-                    s.week.titular, s.week.suplente, s.week.ausente,
-                    s.month.titular, s.month.suplente, s.month.ausente,
+                    s.total.titular,
+                    s.total.suplente,
+                    s.total.ausente,
+                    totalRegistros,
                     resumenText
                 ]);
             });
+
             // Crear libro de Excel
             const ws = XLSX.utils.aoa_to_sheet(reportData);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Reporte de Asistencia');
+
             // Generar nombre del archivo con fechas del rango
             const fileName = `Reporte_Asistencia_${reportStartDate}_a_${reportEndDate}.xlsx`;
             XLSX.writeFile(wb, fileName);
