@@ -1,17 +1,10 @@
 import React, { useRef } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import './Navbar.css';
 
 function Navbar({ activeSection, setActiveSection }) {
     const location = useLocation();
-    const navigate = useNavigate();
-    const token = localStorage.getItem('token');
     const navbarCollapse = useRef(null);
-
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        navigate('/login');
-    };
 
     const handleNavClick = (section) => {
         setActiveSection(section);
@@ -68,15 +61,6 @@ function Navbar({ activeSection, setActiveSection }) {
                                 Estadísticas
                             </Link>
                         </li>
-                        {!token ? (
-                            <li className="nav-item">
-                                <Link className="nav-link" to="/login" onClick={() => handleNavClick('login')}>Iniciar sesión</Link>
-                            </li>
-                        ) : (
-                            <li className="nav-item">
-                                <button className="btn btn-outline-light ms-2" onClick={handleLogout}>Cerrar sesión</button>
-                            </li>
-                        )}
                     </ul>
                 </div>
             </div>

@@ -28,16 +28,6 @@ instance.interceptors.response.use(
                 contentType
             });
 
-            // Si es una respuesta de login o registro, permitirla
-            if (response.config.url.includes('login') || response.config.url.includes('register')) {
-                return response;
-            }
-
-            // Para otras rutas, considerar como error de autenticación
-            localStorage.removeItem('token');
-            if (window.location.pathname !== '/login') {
-                window.location.href = '/login';
-            }
             return Promise.reject(new Error('Invalid response type: expected JSON, got HTML'));
         }
         return response;
@@ -55,11 +45,7 @@ instance.interceptors.response.use(
         // Si el error contiene HTML
         if (error.response?.headers['content-type']?.includes('text/html')) {
             console.error('Received HTML error response');
-            localStorage.removeItem('token');
-            if (window.location.pathname !== '/login') {
-                window.location.href = '/login';
-            }
-            return Promise.reject(new Error('Session expired or invalid response'));
+            return Promise.reject(new Error('Invalid response from server'));
         }
 
         // Error de red
@@ -71,11 +57,8 @@ instance.interceptors.response.use(
         if (error.response) {
             // Error de autenticación
             if (error.response.status === 401) {
-                localStorage.removeItem('token');
-                if (window.location.pathname !== '/login') {
-                    window.location.href = '/login';
-                }
-                return Promise.reject(new Error('Sesión expirada o inválida'));
+                console.warn('Received 401 response');
+                return Promise.reject(new Error('No autorizado'));
             }
 
             // Error del servidor
@@ -106,13 +89,7 @@ instance.interceptors.request.use(
             config.headers.Authorization = `Bearer ${token}`;
         }
 
-        // Verificar autenticación para rutas protegidas
-        if (!token && !config.url.includes('login') && !config.url.includes('register')) {
-            if (window.location.pathname !== '/login') {
-                window.location.href = '/login';
-            }
-            return Promise.reject(new Error('No authentication token'));
-        }
+
 
         // Prevenir caché
         const timestamp = new Date().getTime();
