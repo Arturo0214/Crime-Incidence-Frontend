@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, GeoJSON, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import L from 'leaflet';
+import * as XLSX from 'xlsx';
 import './Map.css';
 import { getIncidents, updateIncident, createIncident, deleteIncident } from '../../services/incidents';
 import * as turf from '@turf/turf';
@@ -769,6 +770,83 @@ const Map = ({ onQuadrantClick }) => {
         }
     };
 
+    const generateExcelReport = () => {
+        try {
+            // Filtrar incidentes según los filtros actuales
+            const filteredIncidents = filterIncidents(incidents);
+
+            // Preparar datos para Excel
+            const excelData = filteredIncidents.map(incident => {
+                let tipoDelito = 'N/A';
+                let delito = 'N/A';
+
+                // Manejar tanto 'Delito' como 'Crimen' como tipos de incidente
+                if (incident.type === 'Delito' || incident.type === 'Crimen') {
+                    const crimeType = incident.crimeType || 'N/A';
+
+                    // Determinar si es alto o bajo impacto
+                    if (DELITOS_ALTO_IMPACTO.includes(crimeType)) {
+                        tipoDelito = 'Alto Impacto';
+                    } else if (DELITOS_BAJO_IMPACTO.includes(crimeType)) {
+                        tipoDelito = 'Bajo Impacto';
+                    } else {
+                        tipoDelito = 'Bajo Impacto'; // Por defecto
+                    }
+
+                    delito = crimeType;
+                } else {
+                    // Para otros tipos de incidentes
+                    tipoDelito = incident.type;
+                    delito = incident.type;
+                }
+
+                // Obtener coordenadas de la estructura correcta
+                const lat = incident.location?.coordinates?.lat || incident.location?.lat;
+                const lng = incident.location?.coordinates?.lng || incident.location?.lng;
+                const coordenadas = lat && lng ? `${lat}, ${lng}` : 'N/A';
+
+                return {
+                    'Tipo de Delito': tipoDelito,
+                    'Delito': delito,
+                    'Fecha': incident.date ? new Date(incident.date).toLocaleDateString('es-ES') : 'N/A',
+                    'Dirección': incident.location?.street || 'N/A',
+                    'Coordenadas': coordenadas,
+                    'Descripción': incident.description || 'N/A'
+                };
+            });
+
+            // Crear workbook y worksheet
+            const workbook = XLSX.utils.book_new();
+            const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+            // Ajustar ancho de columnas
+            const columnWidths = [
+                { wch: 25 }, // Tipo de Delito
+                { wch: 25 }, // Delito
+                { wch: 15 }, // Fecha
+                { wch: 40 }, // Dirección
+                { wch: 20 }, // Coordenadas
+                { wch: 50 }  // Descripción
+            ];
+            worksheet['!cols'] = columnWidths;
+
+            // Agregar worksheet al workbook
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Incidentes');
+
+            // Generar nombre del archivo con fecha
+            const today = new Date();
+            const fileName = `Reporte_Incidentes_${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}.xlsx`;
+
+            // Descargar el archivo
+            XLSX.writeFile(workbook, fileName);
+
+            alert(`Reporte generado exitosamente: ${fileName}`);
+        } catch (error) {
+            console.error('Error al generar reporte Excel:', error);
+            alert('Error al generar el reporte Excel. Por favor, inténtalo de nuevo.');
+        }
+    };
+
     const user = useSelector(state => state.user.user);
     const canEdit = isAdmin(user);
 
@@ -1085,6 +1163,38 @@ const Map = ({ onQuadrantClick }) => {
                                                 {dateRangeInfo.oldestAvailable ? dateRangeInfo.oldestAvailable.toLocaleDateString() : 'Cargando...'}
                                             </span>
                                         </div>
+                                    </div>
+
+                                    {/* Botón para generar reporte Excel */}
+                                    <div style={{
+                                        marginTop: '1rem',
+                                        paddingTop: '1rem',
+                                        borderTop: '1px solid #e2e8f0'
+                                    }}>
+                                        <button
+                                            onClick={generateExcelReport}
+                                            style={{
+                                                width: '100%',
+                                                padding: '0.75rem',
+                                                backgroundColor: '#10b981',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '6px',
+                                                fontSize: '0.875rem',
+                                                fontWeight: '600',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                gap: '0.5rem',
+                                                transition: 'background-color 0.2s'
+                                            }}
+                                            onMouseEnter={(e) => e.target.style.backgroundColor = '#059669'}
+                                            onMouseLeave={(e) => e.target.style.backgroundColor = '#10b981'}
+                                        >
+                                            <i className="fas fa-file-excel"></i>
+                                            Generar Reporte Excel
+                                        </button>
                                     </div>
                                 </div>
                             </>

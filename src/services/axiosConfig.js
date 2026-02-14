@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Base axios configuration
 const instance = axios.create({
-    baseURL: 'https://crime-incidence-backend.onrender.com/api',
+    baseURL: 'https://crime-incidence-backend-production.up.railway.app/api',
     headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'

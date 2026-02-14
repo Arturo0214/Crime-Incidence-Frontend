@@ -1,6 +1,6 @@
 import axiosInstance from './axiosConfig';
 
-export const API_URL = process.env.REACT_APP_API_URL || 'https://crime-incidence-backend.onrender.com/api';
+export const API_URL = process.env.REACT_APP_API_URL || 'https://crime-incidence-backend-production.up.railway.app/api';
 
 export const getAgreements = async () => {
     try {
