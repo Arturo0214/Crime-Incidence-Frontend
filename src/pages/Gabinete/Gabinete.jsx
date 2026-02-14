@@ -80,12 +80,8 @@ const Gabinete = () => {
         }, 100);
     };
 
-    // Redirigir a cuadrantes si no es admin y está en asistencia o peticiones
-    useEffect(() => {
-        if (!isAdmin(user) && (activeTab === 'asistencia' || activeTab === 'peticiones')) {
-            setActiveTab('cuadrantes');
-        }
-    }, [user, activeTab]);
+
+
 
     // Cargar datos de cuadrantes y incidentes
     useEffect(() => {
